@@ -1,0 +1,6 @@
+Cycle thru cameras
+Change output video colour / style (eg greyscale, diff frame)
+output motions to file / spreadsheet
+output a sound on motions (maybe when rect is > a size)
+configure sound outputted
+file menu bar for functions
