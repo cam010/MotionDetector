@@ -2,7 +2,4 @@
 
 To run - Start main.pyw
 
-This app uses the webcam to establish a near-live video feed. It detects differences between frames taken by the webcam to detect motion. The detected changes are then
-drawn around with a rectangle. The rectangles can be toggled and have their size changed. The sensitivity of the motion detection can also be modified.
-The program lists the previous 12 motions detected which updates every 3 seconds. The motions are detected and stored internally every 0.25 seconds. The images are never 
-stored or uploaded
+This software detects motion in either a pre-recorded video file or a live video feed from a camera connected / built in to the computer. The program can also pause/play the video feed. It will draw rectangles around objects that are moving to clearly show motion. The motion timestamps will be recorded in app and also stored in a log file. There are various settings to alter the detection of motion and the video displayed such as motion sensitivity.
