@@ -1,10 +1,30 @@
+# builtins
 import datetime
 import time
-import cv2
-import numpy as np
 import threading
 import os
+from tkinter import Tk
+from tkinter import messagebox
+
+# non builtins
 import playsound
+
+try:
+    import cv2
+except ImportError:
+    Tk().withdraw()
+    messagebox.showerror(
+        "Can't import cv2 module. Please install cv2 package. Program will exit"
+    )
+
+try:
+    import numpy as np
+except ImportError:
+    Tk().withdraw()
+    messagebox.showerror(
+        "Can't import numpy module. Please install numpy package. Program will exit"
+    )
+
 
 # https://towardsdatascience.com/image-analysis-for-beginners-creating-a-motion-detector-with-opencv-4ca6faba4b42
 
@@ -67,7 +87,7 @@ class MotionDetector:
 class Controller:
     def __init__(self) -> None:
         self.source = "camera"
-        
+
         self.stop_thread = False
         self.pause = False
 
@@ -79,7 +99,9 @@ class Controller:
         except FileExistsError:
             pass
 
-        self.output_file_name = os.path.join(os.getenv("localappdata"), "MotionDetector", "motion_log.txt")
+        self.output_file_name = os.path.join(
+            os.getenv("localappdata"), "MotionDetector", "motion_log.txt"
+        )
         self.create_output_file()
 
         # x most recent motions detected
@@ -99,25 +121,28 @@ class Controller:
 
         self.process_frame_thread_controller()
         self.update_motion_thread_controller()
-    
+
     def changed_source(self, source_type):
         # stop frames to remove any errors when changing detector
         self.stop_thread = True
-        
+
         # create new camera
         if source_type == "camera":
             self.create_camera(0)
         elif source_type == "video":
             self.create_camera(None, True, self.source)
             self.start_video_processing()
-            
+
         # reset detector to remove any existing data from other sources
         self.detector = MotionDetector()
-        
+
         # restart frames
         # Sometimes stop thread was being set to true before threads had time to close - caused errors
         while True:
-            if self.process_frame_thread.is_alive() or self.update_motion_thread.is_alive():
+            if (
+                self.process_frame_thread.is_alive()
+                or self.update_motion_thread.is_alive()
+            ):
                 continue
             self.stop_thread = False
             break
@@ -134,17 +159,17 @@ class Controller:
                 return True
             else:
                 return False
-    
+
     def get_webcam_frame(self):
         _, frame = self.camera.read()
         self._init_frame = frame
-    
+
     def get_video_frame(self):
-        self.camera.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num-1)
+        self.camera.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 1)
         _, frame = self.camera.read()
         self._init_frame = frame
         self.frame_num += 1
-    
+
     def start_video_processing(self):
         self.frame_num = 0
         self.total_frames = self.camera.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -155,12 +180,12 @@ class Controller:
                 break
             if self.pause:
                 continue
-            
+
             if self.source == "camera":
                 self.get_webcam_frame()
             else:
                 self.get_video_frame()
-                
+
             if self._init_frame is None:
                 continue
 
