@@ -1,16 +1,32 @@
+# builtins
 import os
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
-from PIL import Image, ImageTk
 import threading
 import time
-import cv2
 import numpy
 import controller
 from os import startfile
 from functools import partial
+
+# non builtins
+try:
+    from PIL import Image, ImageTk
+except ImportError:
+    tk.Tk().withdraw()
+    messagebox.showerror(
+        "Can't import PIL module. Please install PIL package. Program will exit"
+    )
+
+try:
+    import cv2
+except ImportError:
+    tk.Tk().withdraw()
+    messagebox.showerror(
+        "Can't import cv2 module. Please install cv2 package. Program will exit"
+    )
 
 
 class GUI:
@@ -155,7 +171,7 @@ class GUI:
             command=partial(self.changed_camera, "next"),
         )
         self.next_camera_button.grid(row=0, column=3, padx=(0, 10))
-        
+
         for i in range(0, 4):
             self.camera_modifiers_frame.grid_columnconfigure(i, weight=1)
 
@@ -254,7 +270,7 @@ class GUI:
     def sensitivity_changed(self, val):
         threshold = 100 - int(val)
         self.controller.threshold = threshold
-    
+
     def flip_frame(self):
         self.flip = not self.flip
 
@@ -309,7 +325,7 @@ class GUI:
         )
         sensitivity_scale.set(80)
         sensitivity_scale.grid(row=8, column=0)
-        
+
         # Flip image
         self.flip = tk.BooleanVar()
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
