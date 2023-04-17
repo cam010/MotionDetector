@@ -2,8 +2,10 @@
 import os
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
+
+# this is neccessary even though in the code I use tk.filedialog, if not imported specifically error is thrown
 from tkinter import filedialog
+from tkinter import messagebox
 import threading
 import time
 import numpy
@@ -28,6 +30,8 @@ except ImportError:
         "Can't import cv2 module. Please install cv2 package. Program will exit"
     )
 
+import ttk_styles
+
 
 class GUI:
     def __init__(self) -> None:
@@ -35,7 +39,7 @@ class GUI:
 
         self.stop_thread = False
 
-        # window
+        # init window
         self.root = tk.Tk()
         self.root.geometry("929x484")
         self.root.title("Motion Detector")
@@ -46,6 +50,10 @@ class GUI:
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
 
+        # style
+        self.style = ttk_styles.CustomStyle(self.root)
+
+        # create widgets
         self.create_menubar()
         self.create_image_label()
 
@@ -111,24 +119,18 @@ class GUI:
         self.menubar.add_cascade(label="Rect Settings", menu=rect_settings_menu)
 
     def create_image_label(self):
-        self.image_label = tk.Label(self.root, image=None)
+        self.image_label = ttk.Label(self.root, image=None)
         self.image_label.grid(row=0, column=1, sticky="NSEW")
 
     def create_modifiers_frame(self):
-        self.modifiers_frame = tk.Frame(self.root)
+        self.modifiers_frame = ttk.Labelframe(self.root, text="Output Settings")
         self.modifiers_frame.grid(row=0, column=0, sticky="NSEW", rowspan=2)
-        self.modifiers_frame.config(highlightbackground="black")
-        self.modifiers_frame.config(highlightthickness=1)
 
         self.create_modifiers()
 
     def create_motion_frame(self):
-        self.motion_frame = tk.Frame(self.root)
+        self.motion_frame = ttk.Labelframe(self.root, text="Recent Motions")
         self.motion_frame.grid(row=0, column=2, sticky="NSEW", rowspan=2)
-        self.motion_frame.config(highlightbackground="black")
-        self.motion_frame.config(highlightthickness=1)
-
-        tk.Label(self.motion_frame, text="Recent motion detections:").pack()
 
         self.recent_motions = []
         self.motions_labels = []
@@ -138,34 +140,34 @@ class GUI:
         self.update_motions_display_thread_controller()
 
     def create_camera_modifiers_frame(self):
-        self.camera_modifiers_frame = tk.Frame(self.root)
-        self.camera_modifiers_frame.grid(row=1, column=1, sticky="NSEW", pady=(10, 10))
+        self.camera_modifiers_frame = ttk.Labelframe(self.root, text="Source Settings")
+        self.camera_modifiers_frame.grid(row=1, column=1, sticky="NSEW", ipady=10)
 
         self.create_camera_modifiers()
 
     def create_camera_modifiers(self):
-        self.previous_camera_button = tk.Button(
+        self.previous_camera_button = ttk.Button(
             self.camera_modifiers_frame,
             text="<-- Previous Camera",
             command=partial(self.changed_camera, "prev"),
         )
         self.previous_camera_button.grid(row=0, column=0, padx=(10, 0))
 
-        self.switch_frame_source_button = tk.Button(
+        self.switch_frame_source_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Pick File",
             command=lambda: self.change_frame_source(),
         )
         self.switch_frame_source_button.grid(row=0, column=1)
 
-        self.pause_button = tk.Button(
+        self.pause_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Pause",
             command=lambda: self.paused_changed(),
         )
         self.pause_button.grid(row=0, column=2)
 
-        self.next_camera_button = tk.Button(
+        self.next_camera_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Next Camera -->",
             command=partial(self.changed_camera, "next"),
@@ -241,9 +243,9 @@ class GUI:
         if val == "custom":
             new_val = tk.IntVar()
             inp = tk.Toplevel()
-            tk.Label(inp, text="Please enter an int between 10-5000")
+            ttk.Label(inp, text="Please enter an int between 10-5000")
             tk.Entry(inp, textvariable=new_val).pack()
-            tk.Button(
+            ttk.Button(
                 inp,
                 text="save",
                 command=lambda: self.custom_val_rect_area_changed_callback(
@@ -271,20 +273,12 @@ class GUI:
         threshold = 100 - int(val)
         self.controller.threshold = threshold
 
-    def flip_frame(self):
-        self.flip = not self.flip
+    def frame_type_changed(self):
+        self.controller.frame_type = self.frame_type.get()
 
     def create_modifiers(self):
-        tk.Label(self.modifiers_frame, text="DETECTOR MODIFIERS:").grid(
-            row=0,
-            column=0,
-        )
-        ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
-            row=1, column=0, sticky="EW"
-        )
-
         # Whether or not to draw rects around moving objects
-        rect_draw_checkbox = tk.Checkbutton(
+        rect_draw_checkbox = ttk.Checkbutton(
             self.modifiers_frame,
             text="Enable Rect Drawing",
             command=lambda: self.rect_draw_changed(),
@@ -292,14 +286,14 @@ class GUI:
             onvalue=True,
             offvalue=False,
         )
-        rect_draw_checkbox.select()
+        rect_draw_checkbox.state(["selected"])
         rect_draw_checkbox.grid(row=2, column=0)
-        ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
-            row=3, column=0, sticky="EW"
-        )
 
         # How big the minimum area of a moving object rect has to be to be drawn
-        tk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
+        ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
+            row=3, column=0, sticky="EW", pady=3
+        )
+        ttk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
         self.rect_area_scale = tk.Scale(
             self.modifiers_frame,
             orient="horizontal",
@@ -313,9 +307,9 @@ class GUI:
         # Threshold for defining image as "different" - higher threshold is
         # lower motion sensitivity
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
-            row=6, column=0, sticky="EW"
+            row=6, column=0, sticky="EW", pady=3
         )
-        tk.Label(self.modifiers_frame, text="Motion Sensitivity").grid(row=7, column=0)
+        ttk.Label(self.modifiers_frame, text="Motion Sensitivity").grid(row=7, column=0)
         sensitivity_scale = tk.Scale(
             self.modifiers_frame,
             orient="horizontal",
@@ -327,19 +321,36 @@ class GUI:
         sensitivity_scale.grid(row=8, column=0)
 
         # Flip image
-        self.flip = tk.BooleanVar()
+        self.flip = tk.BooleanVar(value=False)
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
-            row=9, column=0, sticky="EW"
+            row=9, column=0, sticky="EW", pady=3
         )
-        flip_image = tk.Checkbutton(
+        self.flip_image = ttk.Checkbutton(
             self.modifiers_frame,
             text="Flip Image",
-            command=lambda: self.flip_frame(),
             variable=self.flip,
             onvalue=True,
             offvalue=False,
         )
-        flip_image.grid(row=10, column=0)
+        self.flip_image.grid(row=10, column=0)
+
+        # Frame types
+        ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
+            row=11, column=0, sticky="EW", pady=3
+        )
+        self.frame_type = tk.StringVar(value="normal")
+        frame_type_options = ["normal", "greyscale"]
+
+        self.frame_type_combobox = ttk.Combobox(
+            self.modifiers_frame,
+            textvariable=self.frame_type,
+            values=frame_type_options,
+        )
+        self.frame_type_combobox["state"] = "readonly"
+        self.frame_type_combobox.bind(
+            "<<ComboboxSelected>>", lambda *args: self.frame_type_changed()
+        )
+        self.frame_type_combobox.grid(row=12, column=0)
 
     def update_motions_display(self):
         while True:
@@ -354,7 +365,7 @@ class GUI:
                 child.destroy()
 
             for x in self.recent_motions:
-                label = tk.Label(self.motion_frame, text=x)
+                label = ttk.Label(self.motion_frame, text=x)
                 label.pack()
                 self.motions_labels.append(label)
 
@@ -372,7 +383,7 @@ class GUI:
         startfile(self.controller.output_file_name)
 
     def open_output_file_button(self):
-        open_output_file_button = tk.Button(
+        open_output_file_button = ttk.Button(
             self.motion_frame,
             text="Open Output File",
             command=lambda: self.open_output_file(),
@@ -394,7 +405,7 @@ class GUI:
             if frame is None:
                 continue
             else:
-                height, width, _ = frame.shape
+                height, width, *args = frame.shape
                 if not self.first_frame_loaded:
                     self.height = height
                     self.width = width
@@ -404,11 +415,7 @@ class GUI:
                     # take off 3 from self.height,width so that frame borders
                     # are shown clearly with no overlap
                     frame = cv2.resize(frame, (self.width - 3, self.height - 3))
-                # image comes in brg format, therefore red would be shown
-                # as blue, etc
-                b, g, r = cv2.split(frame)
-                frame = cv2.merge((r, g, b))
-                if self.flip:
+                if self.flip.get():
                     # flips frame vertically
                     frame = numpy.fliplr(frame)
                 frame = Image.fromarray(frame)

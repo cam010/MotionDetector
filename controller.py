@@ -35,53 +35,66 @@ class MotionDetector:
         self.prev_frame = None
         self.motion = []
 
-    def motion_detector(self, frame, show_rect=True, contour_area=500, threshold=20):
+    def motion_detector(
+        self,
+        frame,
+        show_rect=True,
+        contour_area=500,
+        threshold=20,
+        output="normal",
+        color=(0, 255, 0),
+    ):
+        if output not in ["normal", "greyscale"]:
+            return
         self.frame_count += 1
         # frame = np.array(frame)
         # frame = cv2.cvtColor(src=frame,code=cv2.COLOR_BGR2RGB)
 
-        if self.frame_count % 1 == 0:
-            prepared_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            prepared_frame = cv2.GaussianBlur(
-                src=prepared_frame, ksize=(5, 5), sigmaX=0
-            )
+        prepared_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        prepared_frame = cv2.GaussianBlur(src=prepared_frame, ksize=(5, 5), sigmaX=0)
 
-            if self.prev_frame is None:
-                self.prev_frame = prepared_frame
-                return
-            diff_frame = cv2.absdiff(src1=self.prev_frame, src2=prepared_frame)
+        if self.prev_frame is None:
             self.prev_frame = prepared_frame
+            return
+        diff_frame = cv2.absdiff(src1=self.prev_frame, src2=prepared_frame)
+        self.prev_frame = prepared_frame
 
-            kernel = np.ones((5, 5))
-            diff_frame = cv2.dilate(diff_frame, kernel, 1)
+        kernel = np.ones((5, 5))
+        diff_frame = cv2.dilate(diff_frame, kernel, 1)
 
-            thresh_frame = cv2.threshold(
-                src=diff_frame, thresh=threshold, maxval=255, type=cv2.THRESH_BINARY
-            )[1]
+        thresh_frame = cv2.threshold(
+            src=diff_frame, thresh=threshold, maxval=255, type=cv2.THRESH_BINARY
+        )[1]
 
-            contours, _ = cv2.findContours(
-                image=thresh_frame,
-                mode=cv2.RETR_EXTERNAL,
-                method=cv2.CHAIN_APPROX_SIMPLE,
-            )
-            for contour in contours:
-                if cv2.contourArea(contour) < int(contour_area):
-                    self.motion = []
-                    continue
-                else:
-                    self.motion = datetime.datetime.now()
-                if show_rect:
-                    # shows rect on camera
-                    (x, y, w, h) = cv2.boundingRect(contour)
-                    cv2.rectangle(
-                        img=frame,
-                        pt1=(x, y),
-                        pt2=(x + w, y + h),
-                        color=(0, 255, 0),
-                        thickness=2,
-                    )
+        contours, _ = cv2.findContours(
+            image=thresh_frame,
+            mode=cv2.RETR_EXTERNAL,
+            method=cv2.CHAIN_APPROX_SIMPLE,
+        )
+        if output == "greyscale":
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            # convert back to rgb so rect shown can be other colours
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+        else:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        for contour in contours:
+            if cv2.contourArea(contour) < int(contour_area):
+                self.motion = []
+                continue
+            else:
+                self.motion = datetime.datetime.now()
+            if show_rect:
+                # shows rect on camera
+                (x, y, w, h) = cv2.boundingRect(contour)
+                cv2.rectangle(
+                    img=frame,
+                    pt1=(x, y),
+                    pt2=(x + w, y + h),
+                    color=color,
+                    thickness=2,
+                )
 
-            return frame
+        return frame
 
 
 class Controller:
@@ -118,6 +131,7 @@ class Controller:
         self.show_rect = True
         self.rect_area = 500
         self.threshold = 20
+        self.frame_type = "normal"  # "normal", "greyscale"
 
         self.process_frame_thread_controller()
         self.update_motion_thread_controller()
@@ -189,16 +203,14 @@ class Controller:
             if self._init_frame is None:
                 continue
 
-            if self.show_rect:
-                frame = self.detector.motion_detector(
-                    self._init_frame,
-                    contour_area=self.rect_area,
-                    threshold=self.threshold,
-                )
-            else:
-                frame = self.detector.motion_detector(
-                    self._init_frame, show_rect=False, threshold=self.threshold
-                )
+            frame = self.detector.motion_detector(
+                self._init_frame,
+                contour_area=self.rect_area,
+                threshold=self.threshold,
+                show_rect=self.show_rect,
+                output=self.frame_type,
+            )
+
             if frame is None:
                 continue
             else:

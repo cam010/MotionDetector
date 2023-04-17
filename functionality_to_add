@@ -3,9 +3,9 @@
     Pre-recorded video motion detection
     pause/play button
     flip image
-    file menu
+    Change output video colour / style (eg greyscale, diff frame)
 
-Change output video colour / style (eg greyscale, diff frame)
+change rect colour
 output a sound on motions (maybe when rect is > a size)
 configure sound outputted
 output to files for each day rather than 1 continuous file?
@@ -13,15 +13,17 @@ output to files for each day rather than 1 continuous file?
 resize in aspect ratio so frame doesn't become distorted
 correct motion detection amount of detections listed on resize window
 
+custom menubar like vscode
+make settings frame a tree view
+progress bar when loading in new camera
+
+create style for horizontal sliders
+
+make enable rect drawing button in top menu be selected at program start
+
 ---
 # Auto Resize ->
-    The auto resize of the image is currently done by getting the size of the label that it is contained in. 
-    This label size changes when the window resizes due to grid_columnconfigure(). This causes issue as the 
-    label takes time to resize on startup and window resize. Maybe the first frame could be accessed and its
-    frame size extracted before window shows so window can be sized accurately before appearing to stop with
-    the visible resizing on startup.
+    The auto resize of the image is currently done by getting the size of the label that it is contained in. This label size changes when the window resizes due to grid_columnconfigure(). This causes issue as the label takes time to resize on startup and window resize. Maybe the first frame could be accessed and its frame size extracted before window shows so window can be sized accurately before appearing to stop with the visible resizing on startup.
 
 # Sound playback ->
-    When playing the sound after motion is detected (commented out line in controller.py line 148), it causes
-    a delay in checking motion while the audio is played back. This is once every 3 seconds on my machine. 
-    Perhaps it could be implemented on another thread to stop this delay.
+    When playing the sound after motion is detected (commented out line in controller.py line 148), it causes a delay in checking motion while the audio is played back. This is once every 3 seconds on my machine. Perhaps it could be implemented on another thread to stop this delay.

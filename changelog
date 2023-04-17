@@ -1,0 +1,16 @@
+Changelog
+---------
+
+- Version 1.1 17/04/23
+    * Changed "Detector Modifiers" Frame to a Labelframe and renamed "Output Settings"
+    * Changed "Recent Motion Detections" Frame to a Labelframe and renamed "Recent Motions"
+    * Changed "camera settings" Frame to a Labelframe
+    * Updated all tk buttons to ttk buttons
+    * Updated all tk labels to ttk labels
+    * Changed "Output Video Colour" from a tk OptionMenu to a ttk Combobox
+    * Added a separator between "Flip Image" and "Output Video Colour" options
+    * Added a Style module
+    * Created custom styles for Combobox, Labelframe, Checkbutton, Label, Button and Separator
+
+- Version 1.0 15/04/23
+    * initial release
