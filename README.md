@@ -4,4 +4,4 @@ An application which detects motion from a video source and displays the times a
 
 To run, simply run "main.py"
 
-Tested on python 3.10, however may work in other python 3.x versions. Will not work in python 2
+Tested on python 3.10, however may work in other python 3.x versions.
