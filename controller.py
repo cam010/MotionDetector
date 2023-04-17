@@ -7,7 +7,7 @@ from tkinter import Tk
 from tkinter import messagebox
 
 # non builtins
-import playsound
+# import playsound
 
 try:
     import cv2

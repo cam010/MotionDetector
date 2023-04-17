@@ -267,7 +267,7 @@ class GUI:
 
     def rect_area_changed(self):
         self.controller.rect_area = self.rect_area.get()
-        self.rect_area_scale.set(self.rect_area.get())
+        # self.rect_area_scale.set(self.rect_area.get())
 
     def sensitivity_changed(self):
         threshold = 100 - self.motion_sensitivity.get()
@@ -297,12 +297,22 @@ class GUI:
         ttk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
         self.rect_area_scale = ttk.Scale(
             self.modifiers_frame,
+            variable=self.rect_area,
             orient="horizontal",
             from_=10,
             to=5000,
-            variable=self.rect_area,
             command=lambda _: self.rect_area_changed(),
         )
+        # Not complete yet, but starting code for custom scale.
+        # Doesn't work yet as image needs to resize on scale
+        # self.rect_area_scale = ttk_styles.CustomHorizontalScale(
+        #     root=self.modifiers_frame,
+        #     variable=self.rect_area,
+        #     orient="horizontal",
+        #     from_=10,
+        #     to=5000,
+        #     command=lambda _: self.rect_area_changed(),
+        # )
         self.rect_area_scale.set(500)
         self.rect_area_scale.grid(row=5, column=0)
 
