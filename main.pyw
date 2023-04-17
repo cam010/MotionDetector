@@ -265,12 +265,12 @@ class GUI:
                 "Error", "Value must be an integer between 10-5000 inclusive"
             )
 
-    def rect_area_changed(self, val):
-        self.controller.rect_area = val
-        self.rect_area_scale.set(val)
+    def rect_area_changed(self):
+        self.controller.rect_area = self.rect_area.get()
+        self.rect_area_scale.set(self.rect_area.get())
 
-    def sensitivity_changed(self, val):
-        threshold = 100 - int(val)
+    def sensitivity_changed(self):
+        threshold = 100 - self.motion_sensitivity.get()
         self.controller.threshold = threshold
 
     def frame_type_changed(self):
@@ -293,13 +293,15 @@ class GUI:
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
             row=3, column=0, sticky="EW", pady=3
         )
+        self.rect_area = tk.IntVar()
         ttk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
-        self.rect_area_scale = tk.Scale(
+        self.rect_area_scale = ttk.Scale(
             self.modifiers_frame,
             orient="horizontal",
             from_=10,
             to=5000,
-            command=lambda val: self.rect_area_changed(val),
+            variable=self.rect_area,
+            command=lambda _: self.rect_area_changed(),
         )
         self.rect_area_scale.set(500)
         self.rect_area_scale.grid(row=5, column=0)
@@ -309,13 +311,15 @@ class GUI:
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
             row=6, column=0, sticky="EW", pady=3
         )
+        self.motion_sensitivity = tk.IntVar()
         ttk.Label(self.modifiers_frame, text="Motion Sensitivity").grid(row=7, column=0)
-        sensitivity_scale = tk.Scale(
+        sensitivity_scale = ttk.Scale(
             self.modifiers_frame,
             orient="horizontal",
             from_=1,
             to=99,
-            command=lambda val: self.sensitivity_changed(val),
+            variable=self.motion_sensitivity,
+            command=lambda _: self.sensitivity_changed(),
         )
         sensitivity_scale.set(80)
         sensitivity_scale.grid(row=8, column=0)

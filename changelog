@@ -7,6 +7,7 @@ Changelog
     * Changed "camera settings" Frame to a Labelframe
     * Updated all tk buttons to ttk buttons
     * Updated all tk labels to ttk labels
+    * Updated all tk scales to ttk scales
     * Changed "Output Video Colour" from a tk OptionMenu to a ttk Combobox
     * Added a separator between "Flip Image" and "Output Video Colour" options
     * Added a Style module
