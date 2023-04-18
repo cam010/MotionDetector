@@ -1,0 +1,5 @@
+CV2
+opencv-python
+PIL / Pillow
+Numpy
+simpleaudio==1.2.2

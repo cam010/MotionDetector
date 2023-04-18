@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from tkinter.ttk import Style, Scale
 from tkinter import PhotoImage, IntVar
 from PIL import Image
@@ -13,6 +14,10 @@ class CustomStyle:
         self.style = Style(master=self.root)
         self.style.theme_create("custom_theme", parent="alt")
         self.style.theme_use("custom_theme")
+        
+        # Widget Images Directory
+        parent_dir = Path(__file__).resolve().parents[1]
+        self.widget_image_dir =os.path.join(parent_dir, "Assets", "Images", "Widget Images") 
 
         # load widget styles
         self.labelframe()
@@ -58,8 +63,9 @@ class CustomStyle:
 
     def custom_horizontal_scale(self):
         # https://stackoverflow.com/a/59680262 <-- See this answer regarding custom ttk sliders
-        img = (Image.open(os.path.join("images", "trough.png")))
-        img2 = (Image.open(os.path.join("images", "slider.png")))
+
+        img = (Image.open(os.path.join(self.widget_image_dir, "trough.png")))
+        img2 = (Image.open(os.path.join(self.widget_image_dir, "slider.png")))
         image_trough = ImageTk.PhotoImage(img)
         image_slider = ImageTk.PhotoImage(img2)
         self.style.element_create("custom.Scale.trough", "image", image_trough)

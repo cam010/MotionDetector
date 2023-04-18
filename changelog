@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+- Version 1.2 18/04/23
+    * Restructured file system, reflected in README
+
 - Version 1.1 17/04/23
     * Changed "Detector Modifiers" Frame to a Labelframe and renamed "Output Settings"
     * Changed "Recent Motion Detections" Frame to a Labelframe and renamed "Recent Motions"
