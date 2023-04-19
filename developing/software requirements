@@ -1,0 +1,34 @@
+Features:
+
+BUGS:
+    CRITICAL:
+        "breaks app"
+    URGENT:
+        "component(s) functionality failing"
+        custom rect size menu in menubar not functional with new ttk scale
+    IMPORTANT:
+        "doesn't break anything, but is wrong"
+        enable rect drawing button in menu not showing selected on app start
+    NICE TO FIX:
+        "shouldn't really be like that"
+        correct motion detection amount of detections listed on resize window to fit frame
+
+FEATURES:
+    SOUND:
+        - Play sound on motion detect
+        - Configure sound outputted
+    
+    CAMERA:
+        - Progress bar displayed when loading camera
+
+    SETTINGS:
+        - Make output settings frame have a tree view
+        - Change rect colour
+
+    MOTION:
+        - Output to different files for camera / pre recorded / different day
+        - Output timestamps of video if pre recorded file used
+    
+    WINDOW:
+        - Resize window in aspect ratio
+        - Custom menubar (like vscode)

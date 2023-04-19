@@ -4,22 +4,7 @@
     pause/play button
     flip image
     Change output video colour / style (eg greyscale, diff frame)
-
-change rect colour
-output a sound on motions (maybe when rect is > a size)
-configure sound outputted
-output to files for each day rather than 1 continuous file?
-
-resize in aspect ratio so frame doesn't become distorted
-correct motion detection amount of detections listed on resize window
-
-custom menubar like vscode
-make settings frame a tree view
-progress bar when loading in new camera
-
-create style for horizontal sliders
-
-make enable rect drawing button in top menu be selected at program start
+    create style for horizontal sliders
 
 ---
 # Auto Resize ->
