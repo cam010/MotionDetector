@@ -98,6 +98,8 @@ class CustomHorizontalScale(Scale):
         self.variable.trace_add("write", self._update_text)
 
     def _update_text(self, *args):
+        print(self.variable.get())
+        print(args)
         self.style.configure(self._style_name, text="{:.1f}".format(self.variable.get()))
     
     # def set(self, value) -> None:

@@ -295,24 +295,31 @@ class GUI:
         )
         self.rect_area = tk.IntVar()
         ttk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
-        self.rect_area_scale = ttk.Scale(
-            self.modifiers_frame,
-            variable=self.rect_area,
-            orient="horizontal",
-            from_=10,
-            to=5000,
-            command=lambda _: self.rect_area_changed(),
+
+        use_scale = (
+            False  # set to True for ttk.Scale, False for CustomHorizontalScale
         )
+        if use_scale:
+            self.rect_area_scale = ttk.Scale(
+                self.modifiers_frame,
+                variable=self.rect_area,
+                orient="horizontal",
+                from_=10,
+                to=5000,
+                command=lambda _: self.rect_area_changed(),
+            )
         # Not complete yet, but starting code for custom scale.
         # Doesn't work yet as image needs to resize on scale
-        # self.rect_area_scale = ttk_styles.CustomHorizontalScale(
-        #     root=self.modifiers_frame,
-        #     variable=self.rect_area,
-        #     orient="horizontal",
-        #     from_=10,
-        #     to=5000,
-        #     command=lambda _: self.rect_area_changed(),
-        # )
+        else:
+            self.rect_area_scale = ttk_styles.CustomHorizontalScale(
+                root=self.modifiers_frame,
+                variable=self.rect_area,
+                orient="horizontal",
+                from_=10,
+                to=5000,
+                command=lambda _: self.rect_area_changed(),
+            )
+
         self.rect_area_scale.set(500)
         self.rect_area_scale.grid(row=5, column=0)
 
