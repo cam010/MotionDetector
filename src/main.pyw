@@ -265,7 +265,7 @@ class GUI:
                 "Error", "Value must be an integer between 10-5000 inclusive"
             )
 
-    def rect_area_changed(self):
+    def rect_area_changed(self, val=None):
         self.controller.rect_area = self.rect_area.get()
         # self.rect_area_scale.set(self.rect_area.get())
 
@@ -295,32 +295,30 @@ class GUI:
         )
         self.rect_area = tk.IntVar()
         ttk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
-
-        use_scale = (
-            False  # set to True for ttk.Scale, False for CustomHorizontalScale
+        
+        # Depreciated - now using custom ttk Scale
+        # self.rect_area_scale = ttk.Scale(
+        #     self.modifiers_frame,
+        #     variable=self.rect_area,
+        #     orient="horizontal",
+        #     from_=10,
+        #     to=5000,
+        #     command=lambda _: self.rect_area_changed(),
+        # )
+        # rect_area_scale_frame = ttk.Frame(
+        #     self.modifiers_frame,
+        # )
+        # rect_area_scale_frame.grid(row=5, column=0)
+        # rect_area_scale_frame.pack_propagate(0)
+        self.rect_area_scale = ttk_styles.CustomHorizontalScale(
+            root=self.modifiers_frame,
+            variable=self.rect_area,
+            from_=10,
+            to=5000,
+            command=lambda _: self.rect_area_changed(),
         )
-        if use_scale:
-            self.rect_area_scale = ttk.Scale(
-                self.modifiers_frame,
-                variable=self.rect_area,
-                orient="horizontal",
-                from_=10,
-                to=5000,
-                command=lambda _: self.rect_area_changed(),
-            )
-        # Not complete yet, but starting code for custom scale.
-        # Doesn't work yet as image needs to resize on scale
-        else:
-            self.rect_area_scale = ttk_styles.CustomHorizontalScale(
-                root=self.modifiers_frame,
-                variable=self.rect_area,
-                orient="horizontal",
-                from_=10,
-                to=5000,
-                command=lambda _: self.rect_area_changed(),
-            )
 
-        self.rect_area_scale.set(500)
+        # self.rect_area_scale.set(500)
         self.rect_area_scale.grid(row=5, column=0)
 
         # Threshold for defining image as "different" - higher threshold is
@@ -330,9 +328,8 @@ class GUI:
         )
         self.motion_sensitivity = tk.IntVar()
         ttk.Label(self.modifiers_frame, text="Motion Sensitivity").grid(row=7, column=0)
-        sensitivity_scale = ttk.Scale(
+        sensitivity_scale = ttk_styles.CustomHorizontalScale(
             self.modifiers_frame,
-            orient="horizontal",
             from_=1,
             to=99,
             variable=self.motion_sensitivity,

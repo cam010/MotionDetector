@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
+import tkinter
 from tkinter.ttk import Style, Scale
-from tkinter import PhotoImage, IntVar
-from PIL import Image
-from PIL import ImageTk
+from tkinter import IntVar
+from PIL import Image, ImageTk
 
 
 class CustomStyle:
@@ -14,10 +14,12 @@ class CustomStyle:
         self.style = Style(master=self.root)
         self.style.theme_create("custom_theme", parent="alt")
         self.style.theme_use("custom_theme")
-        
+
         # Widget Images Directory
         parent_dir = Path(__file__).resolve().parents[1]
-        self.widget_image_dir =os.path.join(parent_dir, "Assets", "Images", "Widget Images") 
+        self.widget_image_dir = os.path.join(
+            parent_dir, "Assets", "Images", "Widget Images"
+        )
 
         # load widget styles
         self.labelframe()
@@ -63,13 +65,24 @@ class CustomStyle:
 
     def custom_horizontal_scale(self):
         # https://stackoverflow.com/a/59680262 <-- See this answer regarding custom ttk sliders
+        self.image_trough = ImageTk.PhotoImage(
+            Image.open(os.path.join(self.widget_image_dir, "trough.png")).resize(
+                (25, 25)  # needs to be resized in future
+            )
+        )
+        self.image_slider = ImageTk.PhotoImage(
+            Image.open(os.path.join(self.widget_image_dir, "slider.png")).resize(
+                (30, 30)  # needs to be resized in future
+            )
+        )
+        self.style.element_create("custom.Scale.trough", "image", self.image_trough)
+        self.style.configure(
+            "custom.Scale.trough", image=self.image_trough
+        )  # This needs to be here, similar to camera frame label as img not stored within tkinter properly
 
-        img = (Image.open(os.path.join(self.widget_image_dir, "trough.png")))
-        img2 = (Image.open(os.path.join(self.widget_image_dir, "slider.png")))
-        image_trough = ImageTk.PhotoImage(img)
-        image_slider = ImageTk.PhotoImage(img2)
-        self.style.element_create("custom.Scale.trough", "image", image_trough)
-        self.style.element_create("custom.Scale.slider", "image", image_slider)
+        self.style.element_create("custom.Scale.slider", "image", self.image_slider)
+        self.style.configure("custom.Scale.slider", image=self.image_slider)
+
         self.style.layout(
             "custom.Horizontal.TScale",
             [
@@ -90,18 +103,14 @@ class CustomHorizontalScale(Scale):
     # https://stackoverflow.com/a/59680262 <-- See this answer regarding custom ttk sliders
     def __init__(self, root, **kw):
         self.variable = kw.pop("variable")
-        super().__init__(root, variable=self.variable, **kw)
+        super().__init__(root, variable=self.variable, orient="horizontal", **kw)
         self.style = Style(root)
         self._style_name = "{}.custom.Horizontal.TScale".format(self)
         self["style"] = self._style_name
-        
+
         self.variable.trace_add("write", self._update_text)
 
     def _update_text(self, *args):
-        print(self.variable.get())
-        print(args)
-        self.style.configure(self._style_name, text="{:.1f}".format(self.variable.get()))
-    
-    # def set(self, value) -> None:
-    #     return super().set(value)
-    
+        # print(self.variable.get())
+        pass
+        # self.style.configure(self._style_name, text="{:.1f}".format(self.variable.get()))
