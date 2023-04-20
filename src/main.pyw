@@ -19,6 +19,7 @@ try:
 except ImportError:
     tk.Tk().withdraw()
     messagebox.showerror(
+        "error",
         "Can't import PIL module. Please install PIL package. Program will exit"
     )
 
@@ -27,6 +28,7 @@ try:
 except ImportError:
     tk.Tk().withdraw()
     messagebox.showerror(
+        "error",
         "Can't import cv2 module. Please install cv2 package. Program will exit"
     )
 
@@ -105,7 +107,7 @@ class GUI:
             )
         # menu is created before settings, so self variable has to be created
         # here
-        self.rect_draw_checkbox = tk.BooleanVar()
+        self.rect_draw_checkbox = tk.BooleanVar(value=True)
         rect_settings_menu.add_checkbutton(
             label="Enable Rect Drawing",
             command=lambda: self.rect_draw_changed(),
@@ -266,8 +268,14 @@ class GUI:
             )
 
     def rect_area_changed(self, val=None):
-        self.controller.rect_area = self.rect_area.get()
-        # self.rect_area_scale.set(self.rect_area.get())
+        if val is not None:
+            print()
+            rect_area = self.rect_area.get()
+        else:
+            print(val)
+            rect_area = val
+        self.controller.rect_area = rect_area
+        self.rect_area_scale.set(rect_area)
 
     def sensitivity_changed(self):
         threshold = 100 - self.motion_sensitivity.get()
