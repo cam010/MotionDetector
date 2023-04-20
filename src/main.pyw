@@ -20,7 +20,7 @@ except ImportError:
     tk.Tk().withdraw()
     messagebox.showerror(
         "error",
-        "Can't import PIL module. Please install PIL package. Program will exit"
+        "Can't import PIL module. Please install PIL package. Program will exit",
     )
 
 try:
@@ -29,7 +29,7 @@ except ImportError:
     tk.Tk().withdraw()
     messagebox.showerror(
         "error",
-        "Can't import cv2 module. Please install cv2 package. Program will exit"
+        "Can't import cv2 module. Please install cv2 package. Program will exit",
     )
 
 import ttk_styles
@@ -66,6 +66,10 @@ class GUI:
         self.update_frame_label_frame_thread_controller()
         self.first_frame_loaded = False
         self.root.bind("<Configure>", self.resize)
+        
+        # custom value entering lock
+        self.returned_custom_value = False
+        self.lock_window = False
 
         self.root.mainloop()
 
@@ -181,7 +185,6 @@ class GUI:
 
     def paused_changed(self):
         self.pause_button.config(state="disabled")
-        print(self.root.winfo_width(), self.root.winfo_height())
         if self.pause_button["text"] == "Pause":
             self.pause_button.config(text="Play")
             self.controller.pause = True
@@ -240,39 +243,32 @@ class GUI:
             self.controller.show_rect = True
         else:
             self.controller.show_rect = False
+        
+    def custom_val_rect_area_changed_thread(self):
+        custom_val = ttk_styles.CustomInputWindow(
+                "Custom Val",
+                input_message="Please enter a value for rect area (10-5000 inclusive)",
+                type="int",
+                number_low_boundary=10,
+                number_high_boundary=5000,
+            )
+        while True:
+            val = custom_val.get_val()
+            if val is not False:
+                self.rect_area_changed(val)
 
     def custom_val_rect_area_changed(self, val):
         if val == "custom":
-            new_val = tk.IntVar()
-            inp = tk.Toplevel()
-            ttk.Label(inp, text="Please enter an int between 10-5000")
-            tk.Entry(inp, textvariable=new_val).pack()
-            ttk.Button(
-                inp,
-                text="save",
-                command=lambda: self.custom_val_rect_area_changed_callback(
-                    new_val, inp
-                ),
-            ).pack()
+            pass
         else:
             self.rect_area_changed(val)
 
-    def custom_val_rect_area_changed_callback(self, var, toplevel):
-        if controller.SettingChecks().check_rect_area_10to5000(var.get()):
-            var = var.get()
-            toplevel.destroy()
-            self.rect_area_changed(var)
-        else:
-            messagebox.showerror(
-                "Error", "Value must be an integer between 10-5000 inclusive"
-            )
-
     def rect_area_changed(self, val=None):
-        if val is not None:
-            print()
+        if val is None:
             rect_area = self.rect_area.get()
+            # print("rect_area", rect_area)
         else:
-            print(val)
+            # print(val)
             rect_area = val
         self.controller.rect_area = rect_area
         self.rect_area_scale.set(rect_area)
@@ -303,7 +299,7 @@ class GUI:
         )
         self.rect_area = tk.IntVar()
         ttk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
-        
+
         # Depreciated - now using custom ttk Scale
         # self.rect_area_scale = ttk.Scale(
         #     self.modifiers_frame,

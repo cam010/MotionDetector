@@ -3,15 +3,17 @@ Features:
 BUGS:
     CRITICAL:
         "breaks app"
+        - Some process is hogging resources so frame rate and window update / resize speed is significantly reduced
+        - error when moving slider in minimum rect size scale widget causes too much recursion and app to crash. Only caused on minimum rect size scale, not motion sensitivity
     URGENT:
         "component(s) functionality failing"
-        custom rect size menu in menubar not functional with new ttk scale
+        - minimum rect size menu in menubar not moving scale when size selected
+        - minimum custom rect size menu "custom" selection does nothing, needs implementing to new CustomInputWindow class (ttk_styles.py)
     IMPORTANT:
         "doesn't break anything, but is wrong"
-        enable rect drawing button in menu not showing selected on app start
     NICE TO FIX:
         "shouldn't really be like that"
-        correct motion detection amount of detections listed on resize window to fit frame
+        - correct motion detection amount of detections listed on resize window to fit frame
 
 FEATURES:
     SOUND:
@@ -20,6 +22,7 @@ FEATURES:
     
     CAMERA:
         - Progress bar displayed when loading camera
+        - Disable previous/next camera buttons when file is loaded
 
     SETTINGS:
         - Make output settings frame have a tree view
@@ -32,3 +35,4 @@ FEATURES:
     WINDOW:
         - Resize window in aspect ratio
         - Custom menubar (like vscode)
+        - Give buttons a focus/clicked background color
