@@ -23,6 +23,7 @@ FEATURES:
     CAMERA:
         - Progress bar displayed when loading camera
         - Disable previous/next camera buttons when file is loaded
+        - Disable camera
 
     SETTINGS:
         - Make output settings frame have a tree view
