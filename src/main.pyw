@@ -107,7 +107,7 @@ class GUI:
         for x in [100, 500, 1000, 2500, 5000, "custom"]:
             rect_size.add_command(
                 label=x,
-                command=partial(self.custom_val_rect_area_changed, x),
+                command=partial(self.rect_area_changed, x),
             )
         # menu is created before settings, so self variable has to be created
         # here
@@ -247,25 +247,34 @@ class GUI:
     def custom_val_rect_area_changed(self, val):
         if val == "custom":
             ttk_styles.CustomInputWindow(
-                command=self.rect_area_changed,
+                command=self.custom_val_rect_area_changed,
                 title="Custom Val",
                 input_message="Please enter a value for rect area (10-5000 inclusive)",
-                type="int",
+                type="integer",
                 number_low_boundary=10,
                 number_high_boundary=5000,
             )
         else:
-            self.rect_area_changed(val)
+            self.rect_area_scale.set(val)
 
     def rect_area_changed(self, val=None):
         if val is None:
             rect_area = self.rect_area.get()
+        elif val == "custom":
+            ttk_styles.CustomInputWindow(
+                command=self.rect_area_changed,
+                title="Custom Val",
+                input_message="Please enter a value for rect area (10-5000 inclusive)",
+                type="integer",
+                number_low_boundary=10,
+                number_high_boundary=5000,
+            )
+            return
         else:
-            # print(val)
-            rect_area = val
-        print("set", rect_area)
-        # self.controller.rect_area = rect_area
-        # self.rect_area_scale.set(rect_area)
+            rect_area = val      
+            self.rect_area_scale.set(val)
+        self.controller.rect_area = rect_area
+
 
     def sensitivity_changed(self):
         threshold = 100 - self.motion_sensitivity.get()

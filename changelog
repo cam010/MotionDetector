@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+- Version 1.0.6 23/04/23
+    * Fixed "CRITICAL" bug "error when moving slider in minimum rect size scale widget causes too much recursion and app to crash. Only caused on minimum rect size scale, not motion sensitivity"
+    * Implemented a generic custom input window for menubar settings to come in future, currently used for "rect settings"->"minimum rect size"->"custom"
+
 - Version 1.0.5 21/04/23
     * Can now install all dependencies at once using the command: "pip install -r requirements.txt"
 
@@ -8,7 +12,7 @@ Changelog
     * Fixed "IMPORTANT" bug "enable rect drawing button in menu not showing selected on app start"
     * Started to implement CustomInputWindow for settings that require a custom input. This aims to be a global widget to be used by all settings that require custom input. Base class writted, just needs implementing into settings. Having problem with awaiting user input and threading.
     * No longer prints window size on play/pause
-    * 1 "CRITICAL" bug found, see "software requirements" for more details
+    * 1 "CRITICAL" bug found: "error when moving slider in minimum rect size scale widget causes too much recursion and app to crash. Only caused on minimum rect size scale, not motion sensitivity"
 
 - Version 1.0.3 19/04/23
     * Implemented custom ttk Scale widgets with custom sample images.

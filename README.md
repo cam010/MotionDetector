@@ -8,4 +8,4 @@ To run:
     3) run "pip install -r requirements.txt" - all dependencies will then be installed  
     4) run "main.pyw" in the "src" folder  
 
-Tested on python 3.10, however may work in other python 3.x versions.
+Tested on python 3.10, will not work on older versions of python due to match statement being used

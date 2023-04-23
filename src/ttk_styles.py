@@ -109,13 +109,6 @@ class CustomHorizontalScale(Scale):
         self._style_name = "{}.custom.Horizontal.TScale".format(self)
         self["style"] = self._style_name
 
-        self.variable.trace_add("write", self._update_text)
-
-    def _update_text(self, *args):
-        # print(self.variable.get())
-        pass
-        # self.style.configure(self._style_name, text="{:.1f}".format(self.variable.get()))
-
     def set(self, val):
         super().set(val)
 
@@ -131,15 +124,18 @@ class CustomInputWindow(tkinter.Toplevel):
         command,
         title: str,
         input_message: str,
-        type: Literal["int", "float", "string"],
+        type: Literal["integer", "float", "string"],
         number_low_boundary: float = None,
         number_high_boundary: float = None,
         string_max_len: int = None,
         custom_geometry: str = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        
+        # Exception handler
+        tkinter.Tk.report_callback_exception = self.report_callback_exception
 
         # make params class-wide
         self.command = command
@@ -150,6 +146,7 @@ class CustomInputWindow(tkinter.Toplevel):
 
         # init window
         self.title(title)
+        self.attributes("-topmost", True)
         if custom_geometry is not None:
             self.geometry(custom_geometry)
 
@@ -158,12 +155,13 @@ class CustomInputWindow(tkinter.Toplevel):
         label.grid(row=0, column=0)
 
         # Create input
-        if self.type == "int":
-            self.input_var = tkinter.IntVar()
-        elif self.type == "float":
-            self.input_var = tkinter.DoubleVar()
-        else:
-            self.input_var = tkinter.StringVar()
+        match self.type:
+            case "integer":
+                self.input_var = tkinter.IntVar()
+            case "float":
+                self.input_var = tkinter.DoubleVar()
+            case "string":
+                self.input_var = tkinter.StringVar()
 
         self.input_entry = tkinter.Entry(self, textvariable=self.input_var)
         self.input_entry.grid(row=1, column=0)
@@ -173,18 +171,21 @@ class CustomInputWindow(tkinter.Toplevel):
             self, text="Submit", command=lambda: self.submit()
         )
         self.submit_button.grid(row=2, column=0)
+        self.bind("<Return>", lambda event: self.submit_button.invoke())
 
     def submit(self):
-        val = self.input_var.get()
+        try:
+            val = self.input_var.get()
+        except:
+            raise Exception("Please enter a {} value".format(self.type))
         if val is not None:
             is_within_bounds = self.check_within_bounds(val)
             if not is_within_bounds[0]:
                 message = "Input contains the following errors:"
-                for m in self.error_messages:
-                    message += "\n\t{}".format(m)
-                self.show_error(message)
+                for m in is_within_bounds[1:]:
+                    message += "\n- {}".format(m)
+                raise Exception(message)
             else:
-                self.complete = True
                 self.command(val)
                 self.destroy()
 
@@ -192,17 +193,18 @@ class CustomInputWindow(tkinter.Toplevel):
             self.show_error("Please enter a value")
 
     def check_within_bounds(self, val):
-        if self.type == "int" or self.type == "float":
+        if self.type == "integer" or self.type == "float":
             if val < self.number_low_boundary or val > self.number_high_boundary:
-                return [False]
+                return [False, "number not in boundaries"]
             else:
                 return [True]
 
         elif self.type == "string" and self.string_max_len != None:
-            if len(val) != self.string_max_len:
-                return [False]
+            if len(val) > self.string_max_len:
+                return [False, "string too long"]
             else:
                 return [True]
-
-    def show_error(self, msg):
-        messagebox.showerror("Input Error", msg)
+    
+    def report_callback_exception(self, exc, val, tb):
+        messagebox.showerror("Input Error", val)
+        
