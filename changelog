@@ -1,14 +1,14 @@
 Changelog
 ---------
 
-- Version 1.0.5
+- Version 1.0.5 21/04/23
     * Can now install all dependencies at once using the command: "pip install -r requirements.txt"
 
 - Version 1.0.4 20/04/23 -> The "Yep it broke" Update
     * Fixed "IMPORTANT" bug "enable rect drawing button in menu not showing selected on app start"
     * Started to implement CustomInputWindow for settings that require a custom input. This aims to be a global widget to be used by all settings that require custom input. Base class writted, just needs implementing into settings. Having problem with awaiting user input and threading.
     * No longer prints window size on play/pause
-    * 2 "URGENT" bugs found, see "software requirements" for more details
+    * 2 "CRITICAL" bugs found, see "software requirements" for more details
 
 - Version 1.0.3 19/04/23
     * Implemented custom ttk Scale widgets with custom sample images.
