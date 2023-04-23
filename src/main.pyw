@@ -66,7 +66,7 @@ class GUI:
         self.update_frame_label_frame_thread_controller()
         self.first_frame_loaded = False
         self.root.bind("<Configure>", self.resize)
-        
+
         # custom value entering lock
         self.returned_custom_value = False
         self.lock_window = False
@@ -243,35 +243,29 @@ class GUI:
             self.controller.show_rect = True
         else:
             self.controller.show_rect = False
-        
-    def custom_val_rect_area_changed_thread(self):
-        custom_val = ttk_styles.CustomInputWindow(
-                "Custom Val",
+
+    def custom_val_rect_area_changed(self, val):
+        if val == "custom":
+            ttk_styles.CustomInputWindow(
+                command=self.rect_area_changed,
+                title="Custom Val",
                 input_message="Please enter a value for rect area (10-5000 inclusive)",
                 type="int",
                 number_low_boundary=10,
                 number_high_boundary=5000,
             )
-        while True:
-            val = custom_val.get_val()
-            if val is not False:
-                self.rect_area_changed(val)
-
-    def custom_val_rect_area_changed(self, val):
-        if val == "custom":
-            pass
         else:
             self.rect_area_changed(val)
 
     def rect_area_changed(self, val=None):
         if val is None:
             rect_area = self.rect_area.get()
-            # print("rect_area", rect_area)
         else:
             # print(val)
             rect_area = val
-        self.controller.rect_area = rect_area
-        self.rect_area_scale.set(rect_area)
+        print("set", rect_area)
+        # self.controller.rect_area = rect_area
+        # self.rect_area_scale.set(rect_area)
 
     def sensitivity_changed(self):
         threshold = 100 - self.motion_sensitivity.get()

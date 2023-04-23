@@ -121,11 +121,16 @@ class CustomHorizontalScale(Scale):
 
 
 class CustomInputWindow(tkinter.Toplevel):
+    """Creates a Toplevel asking user for input. Input can be float, int or str.\n
+    Checks input. Checks can include string length and number boundaries.\n
+    When an input is entered which meets checks it calls command with the input as
+    argument in entered type"""
+
     def __init__(
         self,
+        command,
         title: str,
         input_message: str,
-        error_messages: list[str],
         type: Literal["int", "float", "string"],
         number_low_boundary: float = None,
         number_high_boundary: float = None,
@@ -135,26 +140,23 @@ class CustomInputWindow(tkinter.Toplevel):
         **kwargs
     ):
         super().__init__(*args, **kwargs)
-        
-        # is input complete and has it passed authorisation
-        self.complete = False
-        
+
         # make params class-wide
-        self.error_messages = error_messages
+        self.command = command
         self.number_low_boundary = number_low_boundary
         self.number_high_boundary = number_high_boundary
         self.string_max_len = string_max_len
         self.type = type
-        
+
         # init window
         self.title(title)
         if custom_geometry is not None:
             self.geometry(custom_geometry)
-        
+
         # Create label
         label = tkinter.Label(self, text=input_message)
         label.grid(row=0, column=0)
-        
+
         # Create input
         if self.type == "int":
             self.input_var = tkinter.IntVar()
@@ -162,46 +164,45 @@ class CustomInputWindow(tkinter.Toplevel):
             self.input_var = tkinter.DoubleVar()
         else:
             self.input_var = tkinter.StringVar()
-        
-        self.input_entry = tkinter.Entry(self, variable=self.input_var)
+
+        self.input_entry = tkinter.Entry(self, textvariable=self.input_var)
         self.input_entry.grid(row=1, column=0)
 
         # Create submit button
-        self.submit_button = tkinter.Button(self, text="Submit", command=lambda: self.submit())
+        self.submit_button = tkinter.Button(
+            self, text="Submit", command=lambda: self.submit()
+        )
         self.submit_button.grid(row=2, column=0)
-        
+
     def submit(self):
         val = self.input_var.get()
         if val is not None:
             is_within_bounds = self.check_within_bounds(val)
-            if not is_within_bounds:
-                message = "Input contains the follow errors:"
+            if not is_within_bounds[0]:
+                message = "Input contains the following errors:"
                 for m in self.error_messages:
-                    message.append("\n\t{}".format(message))
+                    message += "\n\t{}".format(m)
                 self.show_error(message)
             else:
                 self.complete = True
+                self.command(val)
                 self.destroy()
-            
+
         else:
             self.show_error("Please enter a value")
-    
+
     def check_within_bounds(self, val):
         if self.type == "int" or self.type == "float":
-            if val <= self.number_low_boundary or val <= self.number_high_boundary:
-                return False
+            if val < self.number_low_boundary or val > self.number_high_boundary:
+                return [False]
+            else:
+                return [True]
+
         elif self.type == "string" and self.string_max_len != None:
             if len(val) != self.string_max_len:
-                return False
-    
+                return [False]
+            else:
+                return [True]
+
     def show_error(self, msg):
         messagebox.showerror("Input Error", msg)
-    
-    def get_val(self):
-        """Returns value if user has entered one that has passed authorisation checks, else returns False
-        """
-        if self.complete == True:
-            return self.input_var.get()
-        else:
-            return False
-    

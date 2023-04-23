@@ -3,7 +3,6 @@ Features:
 BUGS:
     CRITICAL:
         "breaks app"
-        - Some process is hogging resources so frame rate and window update / resize speed is significantly reduced
         - error when moving slider in minimum rect size scale widget causes too much recursion and app to crash. Only caused on minimum rect size scale, not motion sensitivity
     URGENT:
         "component(s) functionality failing"
@@ -11,6 +10,7 @@ BUGS:
         - minimum custom rect size menu "custom" selection does nothing, needs implementing to new CustomInputWindow class (ttk_styles.py)
     IMPORTANT:
         "doesn't break anything, but is wrong"
+        - when camera is paused, motion updates are very slow and glitchy
     NICE TO FIX:
         "shouldn't really be like that"
         - correct motion detection amount of detections listed on resize window to fit frame
