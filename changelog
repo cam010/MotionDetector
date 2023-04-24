@@ -1,8 +1,21 @@
 Changelog
 ---------
 
-- Version 1.0.6 23/04/23
+- Version 1.0.8 25/04/23 (The Early Hours Of)
+    * Added "Source Settings" menu, currently has "Open Video File" option
+    * Changed "Rect Settings" menu to "Frame Settings"
+    * Changed "Output Settings" frame to "Frame Settings"
+    * Added "Flip Frame" option to "Frame Settings" menu
+    * Added accelerators for certain menubar settings along with keybindings
+
+- Version 1.0.7 24/04/23
+    * Changed menubar button "rect settings"->"minimum rect size" to "minimum rect area"
+
+
+- Version 1.0.6 23/04/23 -> The "first of many" update
     * Fixed "CRITICAL" bug "error when moving slider in minimum rect size scale widget causes too much recursion and app to crash. Only caused on minimum rect size scale, not motion sensitivity"
+    * Fixed "Urgent" bug "minimum rect size menu in menubar not moving scale when size selected"
+    * Fixed "Urgent" bug "minimum custom rect size menu "custom" selection does nothing, needs implementing to new CustomInputWindow class"
     * Implemented a generic custom input window for menubar settings to come in future, currently used for "rect settings"->"minimum rect size"->"custom"
 
 - Version 1.0.5 21/04/23

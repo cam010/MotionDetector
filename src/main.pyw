@@ -97,13 +97,32 @@ class GUI:
         self.populate_menubar()
 
     def populate_menubar(self):
+        ###########
         # File menu
+        ###########
         file_menu = tk.Menu(self.menubar, tearoff=0)
-        file_menu.add_command(label="Exit", command=lambda: self.quit())
 
+        file_menu.add_command(
+            label="Exit", command=lambda: self.quit(), accelerator="Alt+F4"
+        )
+
+        #################
+        # Source Settings
+        #################
+        source_menu = tk.Menu(self.menubar, tearoff=0)
+
+        source_menu.add_command(
+            label="Open Video File",
+            command=lambda: self.change_frame_source(call_button="menubar"),
+            accelerator="Ctrl+O",
+        )
+
+        ###############
+        # Image settings
+        ###############
         # Rect settings
-        rect_settings_menu = tk.Menu(self.menubar, tearoff=0)
-        rect_size = tk.Menu(rect_settings_menu, tearoff=0)
+        frame_settings_menu = tk.Menu(self.menubar, tearoff=0)
+        rect_size = tk.Menu(frame_settings_menu, tearoff=0)
         for x in [100, 500, 1000, 2500, 5000, "custom"]:
             rect_size.add_command(
                 label=x,
@@ -112,24 +131,63 @@ class GUI:
         # menu is created before settings, so self variable has to be created
         # here
         self.rect_draw_checkbox = tk.BooleanVar(value=True)
-        rect_settings_menu.add_checkbutton(
+        frame_settings_menu.add_checkbutton(
             label="Enable Rect Drawing",
             command=lambda: self.rect_draw_changed(),
             variable=self.rect_draw_checkbox,
             onvalue=True,
             offvalue=False,
+            accelerator="Ctrl+Shift+D",
         )
-        rect_settings_menu.add_cascade(label="Minimum Rect Size", menu=rect_size)
+        frame_settings_menu.add_cascade(label="Minimum Rect Area", menu=rect_size)
+        
+        frame_settings_menu.add_separator()
+        
+        # Frame Settings
+        self.flip = tk.BooleanVar(value=False)
+        frame_settings_menu.add_checkbutton(
+            label="Flip Frame",
+            command=lambda: self.flip.set(not self.flip.get()),
+            variable=self.flip,
+            onvalue=True,
+            offvalue=False,
+            accelerator="Ctrl+Shift+F"
+        )
 
+        ##############
+        # Add Cascades
+        ##############
         self.menubar.add_cascade(label="File", menu=file_menu)
-        self.menubar.add_cascade(label="Rect Settings", menu=rect_settings_menu)
+        self.menubar.add_cascade(label="Source Settings", menu=source_menu)
+        self.menubar.add_cascade(label="Frame Settings", menu=frame_settings_menu)
+
+        ###########
+        # Add Binds
+        ###########
+        # File Menu
+
+        # Source Menu
+        self.root.bind(
+            "<Control-o>", lambda _: self.change_frame_source(call_button="menubar")
+        )
+
+        # Frame Settings Menu
+        self.root.bind(
+            "<Control-Shift-D>",
+            lambda _: self.rect_draw_changed(not self.rect_draw_checkbox.get()),
+        )
+        self.root.bind(
+            "<Control-Shift-F>",
+            lambda _: self.flip.set(not self.flip.get())
+        )
+        self.root.bind("<KeyPress>", lambda e: print(e))
 
     def create_image_label(self):
         self.image_label = ttk.Label(self.root, image=None)
         self.image_label.grid(row=0, column=1, sticky="NSEW")
 
     def create_modifiers_frame(self):
-        self.modifiers_frame = ttk.Labelframe(self.root, text="Output Settings")
+        self.modifiers_frame = ttk.Labelframe(self.root, text="Frame Settings")
         self.modifiers_frame.grid(row=0, column=0, sticky="NSEW", rowspan=2)
 
         self.create_modifiers()
@@ -205,22 +263,30 @@ class GUI:
             filetypes=(filetypes),
         )
 
-    def change_frame_source(self):
-        self.switch_frame_source_button.config(state="disabled")
-
-        if self.switch_frame_source_button["text"] == "Switch to Camera Mode":
-            self.controller.source = "camera"
-            self.controller.changed_source("camera")
-            self.switch_frame_source_button.config(text="Pick File")
-
-        elif self.switch_frame_source_button["text"] == "Pick File":
+    def change_frame_source(self, call_button=None):
+        if call_button is not None:
             source = self.load_video_file()
             if source != "":
                 self.controller.source = source
                 self.controller.changed_source("video")
                 self.switch_frame_source_button.config(text="Switch to Camera Mode")
+        else:
+            # needs to be changed to accommodate menubar open video file
+            self.switch_frame_source_button.config(state="disabled")
 
-        self.switch_frame_source_button.config(state="normal")
+            if self.switch_frame_source_button["text"] == "Switch to Camera Mode":
+                self.controller.source = "camera"
+                self.controller.changed_source("camera")
+                self.switch_frame_source_button.config(text="Pick File")
+
+            elif self.switch_frame_source_button["text"] == "Pick File":
+                source = self.load_video_file()
+                if source != "":
+                    self.controller.source = source
+                    self.controller.changed_source("video")
+                    self.switch_frame_source_button.config(text="Switch to Camera Mode")
+
+            self.switch_frame_source_button.config(state="normal")
 
     def changed_camera(self, change):
         if change == "prev":
@@ -238,7 +304,10 @@ class GUI:
             self.controller.camera_num -= change
         btn.after(100, lambda: btn.config(state="normal"))
 
-    def rect_draw_changed(self):
+    def rect_draw_changed(self, val=None):
+        if val is not None:
+            self.rect_draw_checkbox.set(val)
+            self.rect_draw_changed()
         if self.rect_draw_checkbox.get() == True:
             self.controller.show_rect = True
         else:
@@ -271,10 +340,9 @@ class GUI:
             )
             return
         else:
-            rect_area = val      
+            rect_area = val
             self.rect_area_scale.set(val)
         self.controller.rect_area = rect_area
-
 
     def sensitivity_changed(self):
         threshold = 100 - self.motion_sensitivity.get()
@@ -303,20 +371,6 @@ class GUI:
         self.rect_area = tk.IntVar()
         ttk.Label(self.modifiers_frame, text="Minimum Rect Area").grid(row=4, column=0)
 
-        # Depreciated - now using custom ttk Scale
-        # self.rect_area_scale = ttk.Scale(
-        #     self.modifiers_frame,
-        #     variable=self.rect_area,
-        #     orient="horizontal",
-        #     from_=10,
-        #     to=5000,
-        #     command=lambda _: self.rect_area_changed(),
-        # )
-        # rect_area_scale_frame = ttk.Frame(
-        #     self.modifiers_frame,
-        # )
-        # rect_area_scale_frame.grid(row=5, column=0)
-        # rect_area_scale_frame.pack_propagate(0)
         self.rect_area_scale = ttk_styles.CustomHorizontalScale(
             root=self.modifiers_frame,
             variable=self.rect_area,
@@ -325,7 +379,7 @@ class GUI:
             command=lambda _: self.rect_area_changed(),
         )
 
-        # self.rect_area_scale.set(500)
+        self.rect_area_scale.set(500)
         self.rect_area_scale.grid(row=5, column=0)
 
         # Threshold for defining image as "different" - higher threshold is
@@ -346,7 +400,6 @@ class GUI:
         sensitivity_scale.grid(row=8, column=0)
 
         # Flip image
-        self.flip = tk.BooleanVar(value=False)
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
             row=9, column=0, sticky="EW", pady=3
         )
@@ -430,7 +483,7 @@ class GUI:
             if frame is None:
                 continue
             else:
-                height, width, *args = frame.shape
+                height, width, *_ = frame.shape
                 if not self.first_frame_loaded:
                     self.height = height
                     self.width = width
