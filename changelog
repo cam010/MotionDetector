@@ -1,14 +1,18 @@
 Changelog
 ---------
 
-- Version 1.0.8 25/04/23 (The Early Hours Of)
+- Version 1.1.2 25/04/23
+    * Added "Switch to Camera Mode" button in menu, is disabled when camera is already opened. Keyboard shortcut Ctrl+I
+    * Changed order of proceedings when controller.changed_source is called, meaning no chance of error when switching from camera to video file
+
+- Version 1.1.1 25/04/23 (The Early Hours Of)
     * Added "Source Settings" menu, currently has "Open Video File" option
     * Changed "Rect Settings" menu to "Frame Settings"
     * Changed "Output Settings" frame to "Frame Settings"
     * Added "Flip Frame" option to "Frame Settings" menu
     * Added accelerators for certain menubar settings along with keybindings
 
-- Version 1.0.7 24/04/23
+- Version 1.1.0 24/04/23
     * Changed menubar button "rect settings"->"minimum rect size" to "minimum rect area"
 
 

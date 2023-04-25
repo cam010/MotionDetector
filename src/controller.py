@@ -140,16 +140,6 @@ class Controller:
         # stop frames to remove any errors when changing detector
         self.stop_thread = True
 
-        # create new camera
-        if source_type == "camera":
-            self.create_camera(0)
-        elif source_type == "video":
-            self.create_camera(None, True, self.source)
-            self.start_video_processing()
-
-        # reset detector to remove any existing data from other sources
-        self.detector = MotionDetector()
-
         # restart frames
         # Sometimes stop thread was being set to true before threads had time to close - caused errors
         while True:
@@ -160,6 +150,17 @@ class Controller:
                 continue
             self.stop_thread = False
             break
+
+        # reset detector to remove any existing data from other sources
+        self.detector = MotionDetector()
+
+        # create new camera
+        if source_type == "camera":
+            self.create_camera(0)
+        elif source_type == "video":
+            self.create_camera(None, True, self.source)
+            self.start_video_processing()
+
         self.process_frame_thread_controller()
         self.update_motion_thread_controller()
 

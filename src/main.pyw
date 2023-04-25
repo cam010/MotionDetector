@@ -1,4 +1,5 @@
 # builtins
+import datetime
 import os
 import tkinter as tk
 from tkinter import ttk
@@ -109,16 +110,22 @@ class GUI:
         #################
         # Source Settings
         #################
-        source_menu = tk.Menu(self.menubar, tearoff=0)
+        self.source_menu = tk.Menu(self.menubar, tearoff=0)
 
-        source_menu.add_command(
+        self.source_menu.add_command(
             label="Open Video File",
-            command=lambda: self.change_frame_source(call_button="menubar"),
+            command=lambda: self.change_frame_source(current_source="camera"),
             accelerator="Ctrl+O",
+        )
+        self.source_menu.add_command(
+            label="Switch to Camera Mode",
+            command=lambda: self.change_frame_source(current_source="video"),
+            accelerator="Ctrl+I",
+            state="disabled" # program will start in camera mode
         )
 
         ###############
-        # Image settings
+        # Frame settings
         ###############
         # Rect settings
         frame_settings_menu = tk.Menu(self.menubar, tearoff=0)
@@ -140,9 +147,9 @@ class GUI:
             accelerator="Ctrl+Shift+D",
         )
         frame_settings_menu.add_cascade(label="Minimum Rect Area", menu=rect_size)
-        
+
         frame_settings_menu.add_separator()
-        
+
         # Frame Settings
         self.flip = tk.BooleanVar(value=False)
         frame_settings_menu.add_checkbutton(
@@ -151,14 +158,14 @@ class GUI:
             variable=self.flip,
             onvalue=True,
             offvalue=False,
-            accelerator="Ctrl+Shift+F"
+            accelerator="Ctrl+Shift+F",
         )
 
         ##############
         # Add Cascades
         ##############
         self.menubar.add_cascade(label="File", menu=file_menu)
-        self.menubar.add_cascade(label="Source Settings", menu=source_menu)
+        self.menubar.add_cascade(label="Source Settings", menu=self.source_menu)
         self.menubar.add_cascade(label="Frame Settings", menu=frame_settings_menu)
 
         ###########
@@ -168,7 +175,10 @@ class GUI:
 
         # Source Menu
         self.root.bind(
-            "<Control-o>", lambda _: self.change_frame_source(call_button="menubar")
+            "<Control-o>", lambda _: self.change_frame_source(current_source="camera")
+        )
+        self.root.bind(
+            "<Control-i>", lambda _: self.change_frame_source(current_source="video")
         )
 
         # Frame Settings Menu
@@ -177,8 +187,7 @@ class GUI:
             lambda _: self.rect_draw_changed(not self.rect_draw_checkbox.get()),
         )
         self.root.bind(
-            "<Control-Shift-F>",
-            lambda _: self.flip.set(not self.flip.get())
+            "<Control-Shift-F>", lambda _: self.flip.set(not self.flip.get())
         )
         self.root.bind("<KeyPress>", lambda e: print(e))
 
@@ -220,7 +229,11 @@ class GUI:
         self.switch_frame_source_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Pick File",
-            command=lambda: self.change_frame_source(),
+            command=lambda: self.change_frame_source(
+                current_source="camera"
+                if self.switch_frame_source_button["text"] == "Pick File"
+                else "video"
+            ),
         )
         self.switch_frame_source_button.grid(row=0, column=1)
 
@@ -263,30 +276,31 @@ class GUI:
             filetypes=(filetypes),
         )
 
-    def change_frame_source(self, call_button=None):
-        if call_button is not None:
+    def change_frame_source(self, current_source):
+        self.switch_frame_source_button.config(state="disabled")
+
+        if current_source == "camera":
             source = self.load_video_file()
             if source != "":
                 self.controller.source = source
                 self.controller.changed_source("video")
                 self.switch_frame_source_button.config(text="Switch to Camera Mode")
-        else:
-            # needs to be changed to accommodate menubar open video file
-            self.switch_frame_source_button.config(state="disabled")
+                self.source_menu.entryconfig("Switch to Camera Mode", state="normal")
+                
+        elif current_source == "video":
+            # Next ln is to handle when user uses keyboard shortcut
+            # to call "Switch to Camera Mode" when already in
+            # camera mode
+            if self.source_menu.entrycget(self.source_menu.index("Switch to Camera Mode"), "state") == "disabled":
+                self.switch_frame_source_button.config(state="normal")
+                return
+            
+            self.controller.source = "camera"
+            self.controller.changed_source("camera")
+            self.switch_frame_source_button.config(text="Pick File")
+            self.source_menu.entryconfig("Switch to Camera Mode", state="disabled")
 
-            if self.switch_frame_source_button["text"] == "Switch to Camera Mode":
-                self.controller.source = "camera"
-                self.controller.changed_source("camera")
-                self.switch_frame_source_button.config(text="Pick File")
-
-            elif self.switch_frame_source_button["text"] == "Pick File":
-                source = self.load_video_file()
-                if source != "":
-                    self.controller.source = source
-                    self.controller.changed_source("video")
-                    self.switch_frame_source_button.config(text="Switch to Camera Mode")
-
-            self.switch_frame_source_button.config(state="normal")
+        self.switch_frame_source_button.config(state="normal")
 
     def changed_camera(self, change):
         if change == "prev":
@@ -405,7 +419,7 @@ class GUI:
         )
         self.flip_image = ttk.Checkbutton(
             self.modifiers_frame,
-            text="Flip Image",
+            text="Flip Frame",
             variable=self.flip,
             onvalue=True,
             offvalue=False,
