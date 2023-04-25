@@ -8,6 +8,7 @@ BUGS:
     IMPORTANT:
         "doesn't break anything, but is wrong"
         - when camera is paused, motion updates are very slow and glitchy
+        - videos opened take much longer in the player and run at about 9-10frames/second. This could be increased using Queue() (see https://pyimagesearch.com/2017/02/06/faster-video-file-fps-with-cv2-videocapture-and-opencv/)
     NICE TO FIX:
         "shouldn't really be like that"
         - correct motion detection amount of detections listed on resize window to fit frame
