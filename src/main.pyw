@@ -284,13 +284,12 @@ class GUI:
             if source != "":
                 self.controller.source = source
                 self.controller.changed_source("video")
-                self.switch_frame_source_button.config(text="Switch to Camera Mode")
+                self.switch_frame_source_button.config(text="Switch to Camera Mode") 
                 self.source_menu.entryconfig("Switch to Camera Mode", state="normal")
                 
         elif current_source == "video":
-            # Next ln is to handle when user uses keyboard shortcut
-            # to call "Switch to Camera Mode" when already in
-            # camera mode
+            # This if statement is to handle when user uses keyboard shortcut
+            # to call "Switch to Camera Mode" when already in camera mode
             if self.source_menu.entrycget(self.source_menu.index("Switch to Camera Mode"), "state") == "disabled":
                 self.switch_frame_source_button.config(state="normal")
                 return
