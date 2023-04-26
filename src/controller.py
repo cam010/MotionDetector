@@ -180,7 +180,6 @@ class Controller:
         self._init_frame = frame
 
     def get_video_frame(self):
-        self.camera.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 1)
         _, frame = self.camera.read()
         self._init_frame = frame
         self.frame_num += 1
@@ -194,6 +193,9 @@ class Controller:
             if self.stop_thread:
                 break
             if self.pause:
+                time.sleep(
+                    0.25
+                )  # if not here in every thread, causes app to grind to halt during pause
                 continue
 
             if self.source == "camera":
@@ -227,6 +229,12 @@ class Controller:
         while True:
             if self.stop_thread:
                 break
+            if self.pause:
+                time.sleep(
+                    0.25
+                )  # if not here in every thread, causes app to grind to halt during pause
+                continue
+
             # temp motion created as otherwise the GUI may get the motion when there is > 5 elements
             # because of threading and them executing at different times
             temp_motion = []

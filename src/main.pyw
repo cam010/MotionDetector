@@ -41,6 +41,7 @@ class GUI:
         self.controller = controller.Controller()
 
         self.stop_thread = False
+        self.pause = False
 
         # init window
         self.root = tk.Tk()
@@ -68,9 +69,6 @@ class GUI:
         self.first_frame_loaded = False
         self.root.bind("<Configure>", self.resize)
 
-        # custom value entering lock
-        self.returned_custom_value = False
-        self.lock_window = False
 
         self.root.mainloop()
 
@@ -259,10 +257,12 @@ class GUI:
         if self.pause_button["text"] == "Pause":
             self.pause_button.config(text="Play")
             self.controller.pause = True
+            self.pause = True
 
         else:
             self.pause_button.config(text="Pause")
             self.controller.pause = False
+            self.pause = False
         self.pause_button.config(state="normal")
 
     def load_video_file(self):
@@ -439,7 +439,7 @@ class GUI:
         )
         self.frame_type_combobox["state"] = "readonly"
         self.frame_type_combobox.bind(
-            "<<ComboboxSelected>>", lambda *args: self.frame_type_changed()
+            "<<ComboboxSelected>>", lambda *_: self.frame_type_changed()
         )
         self.frame_type_combobox.grid(row=12, column=0)
 
@@ -447,6 +447,9 @@ class GUI:
         while True:
             if self.stop_thread:
                 break
+            if self.pause:
+                time.sleep(0.25) # if not here in every thread, causes app to grind to halt during pause
+                continue
             self.update_motions_internal()
             for child in self.motion_frame.winfo_children():
                 if child["text"] == "Recent motion detections:":
@@ -492,6 +495,9 @@ class GUI:
         while True:
             if self.stop_thread:
                 break
+            if self.pause:
+                time.sleep(0.25) # if not here in every thread, causes app to grind to halt during pause
+                continue
             frame = self.controller.get_frame()
             if frame is None:
                 continue

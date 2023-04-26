@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+- Version 1.1.3 26/04/23
+    * Fixed "IMPORTANT" bug "videos opened take much longer in the player and run at about 9-10frames/second" by removing self.camera.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 1) line in controller. This was an unnecessary line and slowed the fps down by nearly 10x.
+    * Fixed "IMPORTANT" bug "when camera is paused, motion updates are very slow and glitchy" by adding a time delay before continue statement in while True loop threads
+    * Motion no longer updates when paused
+
 - Version 1.1.2 25/04/23
     * Added "Switch to Camera Mode" button in menu, is disabled when camera is already opened. Keyboard shortcut Ctrl+I
     * Changed order of proceedings when controller.changed_source is called, meaning no chance of error when switching from camera to video file
