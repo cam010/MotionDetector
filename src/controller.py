@@ -1,5 +1,6 @@
 # builtins
 import datetime
+from pathlib import Path
 import time
 import threading
 import os
@@ -125,7 +126,7 @@ class Controller:
 
         # add functionality to cycle thru cameras
         self.camera_num = 0
-        self.create_camera(self.camera_num)
+        self.create_camera(self.camera_num, first=True)
 
         self.detector = MotionDetector()
 
@@ -135,16 +136,18 @@ class Controller:
         self.threshold = 20
         self.frame_type = "normal"  # "normal", "greyscale"
 
-        self.process_frame_thread_controller()
-        self.update_motion_thread_controller()
+        # self.process_frame_thread_controller()
+        # self.update_motion_thread_controller()
 
-    def changed_source(self, source_type):
+    def changed_source(self, source_type, first=False):
         # stop frames to remove any errors when changing detector
         self.stop_thread = True
 
         # restart frames
         # Sometimes stop thread was being set to true before threads had time to close - caused errors
         while True:
+            if first:
+                break
             if (
                 self.process_frame_thread.is_alive()
                 or self.update_motion_thread.is_alive()
@@ -160,21 +163,26 @@ class Controller:
         if source_type == "camera":
             self.create_camera(0)
         elif source_type == "video":
-            self.create_camera(None, True, self.source)
+            self.create_camera(None, video=True, vidpath=self.source)
             self.start_video_processing()
 
-        self.process_frame_thread_controller()
-        self.update_motion_thread_controller()
+        if not first:
+            self.process_frame_thread_controller()
+            self.update_motion_thread_controller()
 
-    def create_camera(self, cam_num, video=False, vidpath=None):
+    def create_camera(self, cam_num, video=False, vidpath=None, first=False):
         if video:
             self.camera = cv2.VideoCapture(vidpath)
+            self.changed_source("video")
         else:
             camera = cv2.VideoCapture(cam_num, cv2.CAP_DSHOW)
             if camera is not None and camera.isOpened():
                 self.camera = camera
+                self.changed_source("camera")
                 return True
             else:
+                self.source = "blank"
+                self.changed_source("blank", first=first)
                 return False
 
     def get_webcam_frame(self):
@@ -185,6 +193,15 @@ class Controller:
         _, frame = self.camera.read()
         self._init_frame = frame
         self.frame_num += 1
+    
+    def get_blank_frame(self):
+        # Widget Images Directory
+        parent_dir = Path(__file__).resolve().parents[1]
+        widget_image_dir = os.path.join(
+            parent_dir, "Assets", "Images", "Widget Images"
+        )
+        self._init_frame = cv2.imread(os.path.join(widget_image_dir, "webcam_not_found.png"))
+        
 
     def start_video_processing(self):
         self.frame_num = 0
@@ -193,6 +210,7 @@ class Controller:
         print(self.fps)
 
     def process_frame(self):
+        print("called")
         while True:
             if self.stop_thread:
                 break
@@ -204,6 +222,9 @@ class Controller:
 
             if self.source == "camera":
                 self.get_webcam_frame()
+            elif self.source == "blank":
+                print("ok")
+                self.get_blank_frame()
             else:
                 self.get_video_frame()
 
@@ -230,6 +251,7 @@ class Controller:
         return self.motion
 
     def update_motion(self):
+        print("called2")
         while True:
             if self.stop_thread:
                 break
