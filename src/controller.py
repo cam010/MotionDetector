@@ -106,6 +106,8 @@ class Controller:
 
         self._init_frame = None
         self.processed_frame = None
+        
+        self.fps = 0
 
         try:
             os.mkdir(os.path.join(os.getenv("localappdata"), "MotionDetector"))
@@ -121,9 +123,9 @@ class Controller:
         self.RECENT_MOTIONS_COUNT = 20
         self.motion = ["-" for _ in range(self.RECENT_MOTIONS_COUNT)]
 
+        # add functionality to cycle thru cameras
         self.camera_num = 0
         self.create_camera(self.camera_num)
-        # add functionality to cycle thru cameras
 
         self.detector = MotionDetector()
 
@@ -187,6 +189,8 @@ class Controller:
     def start_video_processing(self):
         self.frame_num = 0
         self.total_frames = self.camera.get(cv2.CAP_PROP_FRAME_COUNT)
+        self.fps = self.camera.get(cv2.CAP_PROP_FPS)
+        print(self.fps)
 
     def process_frame(self):
         while True:
@@ -196,7 +200,7 @@ class Controller:
                 time.sleep(
                     0.25
                 )  # if not here in every thread, causes app to grind to halt during pause
-                continue
+                continue 
 
             if self.source == "camera":
                 self.get_webcam_frame()
