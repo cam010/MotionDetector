@@ -102,6 +102,7 @@ class Controller:
     def __init__(self) -> None:
         self.source = "camera"
 
+        self.threads_alive = []
         self.stop_thread = False
         self.pause = False
 
@@ -125,8 +126,9 @@ class Controller:
         self.motion = ["-" for _ in range(self.RECENT_MOTIONS_COUNT)]
 
         # add functionality to cycle thru cameras
-        self.camera_num = 0
-        self.create_camera(self.camera_num, first=True)
+        self.max_camera_num = self.detect_cameras()
+        self.current_camera_num = 0
+        self.changed_source("camera")
 
         self.detector = MotionDetector()
 
@@ -139,51 +141,110 @@ class Controller:
         # self.process_frame_thread_controller()
         # self.update_motion_thread_controller()
 
-    def changed_source(self, source_type, first=False):
-        # stop frames to remove any errors when changing detector
-        self.stop_thread = True
+    # def changed_source(self, source_type, first=False):
+    #     # stop frames to remove any errors when changing detector
+    #     self.stop_thread = True
 
-        # restart frames
+    #     # restart frames
+    #     # Sometimes stop thread was being set to true before threads had time to close - caused errors
+    #     while True:
+    #         if first:
+    #             break
+    #         if (
+    #             self.process_frame_thread.is_alive()
+    #             or self.update_motion_thread.is_alive()
+    #         ):
+    #             continue
+    #         self.stop_thread = False
+    #         break
+
+    #     # reset detector to remove any existing data from other sources
+    #     self.detector = MotionDetector()
+
+    #     # create new camera
+    #     # if source_type == "camera":
+    #     #     self.create_camera(0)
+    #     # elif source_type == "video":
+    #     #     self.create_camera(None, video=True, vidpath=self.source)
+    #     #     self.start_video_processing()
+
+    #     if not first:
+    #         self.process_frame_thread_controller()
+    #         self.update_motion_thread_controller()
+
+    # def create_camera(self, cam_num, video=False, vidpath=None, first=False):
+    #     if video:
+    #         self.camera = cv2.VideoCapture(vidpath)
+    #     else:
+    #         camera = cv2.VideoCapture(cam_num, cv2.CAP_DSHOW)
+    #         if camera is not None and camera.isOpened():
+    #             self.camera = camera
+    #             return True
+    #         else:
+    #             self.source = "blank"
+    #             return False
+            
+    def changed_source(self, source_type):
+        self.stop_thread = True
+        
         # Sometimes stop thread was being set to true before threads had time to close - caused errors
         while True:
-            if first:
-                break
-            if (
-                self.process_frame_thread.is_alive()
-                or self.update_motion_thread.is_alive()
-            ):
+            if len(self.threads_alive) > 0:
                 continue
-            self.stop_thread = False
-            break
-
-        # reset detector to remove any existing data from other sources
+            else:
+                self.stop_thread = False
+                break
+                
+        # reset detector
         self.detector = MotionDetector()
-
+        
         # create new camera
         if source_type == "camera":
-            self.create_camera(0)
+            self.create_camera(self.current_camera_num)
         elif source_type == "video":
             self.create_camera(None, video=True, vidpath=self.source)
             self.start_video_processing()
-
-        if not first:
-            self.process_frame_thread_controller()
-            self.update_motion_thread_controller()
-
-    def create_camera(self, cam_num, video=False, vidpath=None, first=False):
+        
+        self.process_frame_thread_controller()
+        self.update_motion_thread_controller()
+            
+    def create_camera(self, cam_num, video=False, vidpath=None):
         if video:
             self.camera = cv2.VideoCapture(vidpath)
-            self.changed_source("video")
         else:
             camera = cv2.VideoCapture(cam_num, cv2.CAP_DSHOW)
             if camera is not None and camera.isOpened():
                 self.camera = camera
-                self.changed_source("camera")
-                return True
             else:
                 self.source = "blank"
-                self.changed_source("blank", first=first)
-                return False
+    
+    def change_camera(self, change=int):
+        new_num = self.current_camera_num + change
+        if new_num < 0 or new_num > self.max_camera_num:
+            return False
+        else:
+            self.current_camera_num = new_num
+            self.changed_source("camera")
+            return True
+    
+    def check_camera_exists(self, num):
+        camera = cv2.VideoCapture(num)
+        if camera is not None and camera.isOpened():
+            return True
+        else:
+            return False
+    
+    def detect_cameras(self):
+        i = 0
+        max_cam_index = -1
+        while True:
+            is_camera = self.check_camera_exists(i)
+            if is_camera:
+                max_cam_index = i
+            else:
+                break
+            i += 1
+        return max_cam_index
 
     def get_webcam_frame(self):
         _, frame = self.camera.read()
@@ -213,6 +274,7 @@ class Controller:
         print("called")
         while True:
             if self.stop_thread:
+                self.threads_alive.remove(self.process_frame_thread)
                 break
             if self.pause:
                 time.sleep(
@@ -254,6 +316,7 @@ class Controller:
         print("called2")
         while True:
             if self.stop_thread:
+                self.threads_alive.remove(self.update_motion_thread)
                 break
             if self.pause:
                 time.sleep(
@@ -295,11 +358,13 @@ class Controller:
         self.update_motion_thread = threading.Thread(target=self.update_motion)
         self.update_motion_thread.daemon = True
         self.update_motion_thread.start()
+        self.threads_alive.append(self.update_motion_thread)
 
     def process_frame_thread_controller(self):
         self.process_frame_thread = threading.Thread(target=self.process_frame)
         self.process_frame_thread.daemon = True
         self.process_frame_thread.start()
+        self.threads_alive.append(self.process_frame_thread)
 
 
 class SettingChecks:

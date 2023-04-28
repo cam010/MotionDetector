@@ -311,10 +311,7 @@ class GUI:
             btn.config(state="disabled")
             change = -1
 
-        self.controller.camera_num += change
-        success = self.controller.create_camera(self.controller.camera_num)
-        if not success:
-            self.controller.camera_num -= change
+        self.controller.change_camera(change)
         btn.after(100, lambda: btn.config(state="normal"))
 
     def rect_draw_changed(self, val=None):
