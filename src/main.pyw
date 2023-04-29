@@ -112,12 +112,12 @@ class GUI:
 
         self.source_menu.add_command(
             label="Open Video File",
-            command=lambda: self.change_frame_source(current_source="camera"),
+            command=lambda: self.change_frame_source(change_to="video"),
             accelerator="Ctrl+O",
         )
         self.source_menu.add_command(
             label="Switch to Camera Mode",
-            command=lambda: self.change_frame_source(current_source="video"),
+            command=lambda: self.change_frame_source(change_to="camera"),
             accelerator="Ctrl+I",
             state="disabled" # program will start in camera mode
         )
@@ -173,10 +173,10 @@ class GUI:
 
         # Source Menu
         self.root.bind(
-            "<Control-o>", lambda _: self.change_frame_source(current_source="camera")
+            "<Control-o>", lambda _: self.change_frame_source(change_to="video")
         )
         self.root.bind(
-            "<Control-i>", lambda _: self.change_frame_source(current_source="video")
+            "<Control-i>", lambda _: self.change_frame_source(change_to="camera")
         )
 
         # Frame Settings Menu
@@ -228,26 +228,35 @@ class GUI:
             self.camera_modifiers_frame,
             text="Pick File",
             command=lambda: self.change_frame_source(
-                current_source="camera"
+                change_to="video"
                 if self.switch_frame_source_button["text"] == "Pick File"
-                else "video"
+                else "camera"
             ),
         )
         self.switch_frame_source_button.grid(row=0, column=1)
+        
+        self.disable_source_button = ttk.Button(
+            self.camera_modifiers_frame,
+            text="Disable Source",
+            command = lambda: self.change_frame_source(
+                change_to="blank",
+            )
+        )
+        self.disable_source_button.grid(row=0, column=2)
 
         self.pause_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Pause",
             command=lambda: self.paused_changed(),
         )
-        self.pause_button.grid(row=0, column=2)
+        self.pause_button.grid(row=0, column=3)
 
         self.next_camera_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Next Camera -->",
             command=partial(self.changed_camera, "next"),
         )
-        self.next_camera_button.grid(row=0, column=3, padx=(0, 10))
+        self.next_camera_button.grid(row=0, column=4, padx=(0, 10))
 
         for i in range(0, 4):
             self.camera_modifiers_frame.grid_columnconfigure(i, weight=1)
@@ -276,19 +285,27 @@ class GUI:
             filetypes=(filetypes),
         )
 
-    def change_frame_source(self, current_source):
+    def change_frame_source(self, change_to):
         self.switch_frame_source_button.config(state="disabled")
+        
+        if change_to == "blank":
+            self.controller.source = "blank"
+            self.controller.changed_source("blank")
+            self.source_menu.entryconfig("Switch to Camera Mode", state="normal")
+            self.disable_source_button.config(state="disabled")
+            self.switch_frame_source_button.config(state="normal")
 
-        if current_source == "camera":
+        if change_to == "video":
             source = self.load_video_file()
             if source != "":
                 self.controller.vid_source = source
                 self.controller.source = "video"
                 self.controller.changed_source("video")
+                self.disable_source_button.config(state="normal")
                 self.switch_frame_source_button.config(text="Switch to Camera Mode") 
                 self.source_menu.entryconfig("Switch to Camera Mode", state="normal")
                 
-        elif current_source == "video":
+        elif change_to == "camera":
             # This if statement is to handle when user uses keyboard shortcut
             # to call "Switch to Camera Mode" when already in camera mode
             if self.source_menu.entrycget(self.source_menu.index("Switch to Camera Mode"), "state") == "disabled":
@@ -297,6 +314,7 @@ class GUI:
             
             self.controller.source = "camera"
             self.controller.changed_source("camera")
+            self.disable_source_button.config(state="normal")
             self.switch_frame_source_button.config(text="Pick File")
             self.source_menu.entryconfig("Switch to Camera Mode", state="disabled")
 

@@ -145,7 +145,6 @@ class Controller:
         # Sometimes stop thread was being set to true before threads had time to close - caused errors
         while True:
             if len(self.threads_alive) > 0:
-                print(self.threads_alive)
                 continue
             else:
                 self.stop_thread = False
@@ -222,7 +221,7 @@ class Controller:
         parent_dir = Path(__file__).resolve().parents[1]
         widget_image_dir = os.path.join(parent_dir, "Assets", "Images", "Widget Images")
         self._init_frame = cv2.imread(
-            os.path.join(widget_image_dir, "webcam_not_found.png")
+            os.path.join(widget_image_dir, "no_camera.png")
         )
 
     def start_video_processing(self):
@@ -272,19 +271,14 @@ class Controller:
                 self.processed_frame = frame
             if source == "video":
                 if video_finished:
-                    print((self.start_vid - datetime.datetime.now()).total_seconds())
                     self.threads_alive.remove(self.process_frame_thread)
                     break
-                end_process_time = time.time()#datetime.datetime.now()
-                # difference = (
-                #     end_process_time - start_process_time
-                # ).total_seconds() / 1000
-                difference = (end_process_time - start_process_time)#.total_seconds()
+                end_process_time = time.time()
+                difference = (end_process_time - start_process_time)
                 if difference < 1 / self.fps:
-                    print(1/self.fps, difference, 1/self.fps - difference)
+                    # If the time spent processing the frame (difference) is less than the time that each frame should
+                    # be displayed for (to fit with fps) then add a wait until the frame duration is finished
                     time.sleep(((1 / self.fps) - difference))
-                else:
-                    print("!!", difference)
 
     def get_frame(self):
         return self.processed_frame

@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+- Version 1.1.5
+    * Added a "disable source" button
+
 - Version 1.1.4 29/04/23
     * Fixed "IMPORTANT" bug "Now FPS is increased, it is much faster than the actual video FPS. Needs to be set to video frame rate." and set a video playback to max fps of the video. Note, may be less than this due to large video resolutions.
 

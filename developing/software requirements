@@ -7,7 +7,6 @@ BUGS:
         "component(s) functionality failing"
     IMPORTANT:
         "doesn't break anything, but is wrong"
-        
     NICE TO FIX:
         "shouldn't really be like that"
         - correct motion detection amount of detections listed on resize window to fit frame
@@ -22,6 +21,7 @@ FEATURES:
         - Disable previous/next camera buttons when file is loaded
         - Disable camera option
         - playback efficiency from files could be increased using Queue() (see https://pyimagesearch.com/2017/02/06/faster-video-file-fps-with-cv2-videocapture-and-opencv/)
+        - Preload video frames (see above)
 
     SETTINGS:
         - Make output settings frame have a tree view
