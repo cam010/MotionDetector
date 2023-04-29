@@ -282,7 +282,8 @@ class GUI:
         if current_source == "camera":
             source = self.load_video_file()
             if source != "":
-                self.controller.source = source
+                self.controller.vid_source = source
+                self.controller.source = "video"
                 self.controller.changed_source("video")
                 self.switch_frame_source_button.config(text="Switch to Camera Mode") 
                 self.source_menu.entryconfig("Switch to Camera Mode", state="normal")

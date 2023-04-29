@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+- Version 1.1.4 29/04/23
+    * Fixed "IMPORTANT" bug "Now FPS is increased, it is much faster than the actual video FPS. Needs to be set to video frame rate." and set a video playback to max fps of the video. Note, may be less than this due to large video resolutions.
+
 - Version 1.1.3 26/04/23
     * Fixed "IMPORTANT" bug "videos opened take much longer in the player and run at about 9-10frames/second" by removing self.camera.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num - 1) line in controller. This was an unnecessary line and slowed the fps down by nearly 10x.
     * Fixed "IMPORTANT" bug "when camera is paused, motion updates are very slow and glitchy" by adding a time delay before continue statement in while True loop threads

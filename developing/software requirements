@@ -7,7 +7,7 @@ BUGS:
         "component(s) functionality failing"
     IMPORTANT:
         "doesn't break anything, but is wrong"
-        - Now FPS is increased, it is much faster than the actual video FPS. Needs to be set to video frame rate.
+        
     NICE TO FIX:
         "shouldn't really be like that"
         - correct motion detection amount of detections listed on resize window to fit frame
