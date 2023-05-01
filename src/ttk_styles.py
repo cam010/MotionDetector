@@ -6,6 +6,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 from typing import Literal
 import colours
+import ttkthemes
 
 
 class LightThemeStyle:
@@ -109,7 +110,7 @@ class DarkThemeStyle:
 
         # init style
         self.style = Style(master=self.root)
-        self.style.theme_create("dark_theme", parent="alt")
+        self.style.theme_create("dark_theme", parent="clam")
         self.style.theme_use("dark_theme")
 
         # Widget Images Directory
@@ -132,6 +133,8 @@ class DarkThemeStyle:
             "TLabelframe",
             background=colours.DARK_WIDGET_BACKGROUND,
             foreground=colours.DARK_TEXT_COLOUR,
+            bordercolor=colours.DARK_WIDGET_ALT,
+            relief="solid"
         )
         self.style.configure(
             "TLabelframe.Label",
@@ -152,9 +155,8 @@ class DarkThemeStyle:
             background=colours.DARK_WIDGET_BACKGROUND,
             focuscolor=colours.DARK_WIDGET_BACKGROUND,
             foreground=colours.DARK_WIDGET_ALT,
-            bd=None # error here no -bd
         )
-        
+
     def combobox(self):
         self.style.configure(
             "TCombobox",
@@ -165,7 +167,11 @@ class DarkThemeStyle:
         )
 
     def button(self):
-        self.style.configure("TButton", background=colours.DARK_WIDGET_BACKGROUND)
+        self.style.configure(
+            "TButton",
+            background=colours.DARK_WIDGET_BACKGROUND,
+            foreground=colours.DARK_TEXT_COLOUR,
+        )
 
     def separator(self):
         self.style.configure(
@@ -184,24 +190,24 @@ class DarkThemeStyle:
                 (30, 30)  # needs to be resized in future
             )
         )
-        self.style.element_create("custom.Scale.trough", "image", self.image_trough)
+        self.style.element_create("dark_theme.Scale.trough", "image", self.image_trough)
         self.style.configure(
-            "custom.Scale.trough", image=self.image_trough
+            "dark_theme.Scale.trough", image=self.image_trough
         )  # This needs to be here, similar to camera frame label as img not stored within tkinter properly
 
-        self.style.element_create("custom.Scale.slider", "image", self.image_slider)
-        self.style.configure("custom.Scale.slider", image=self.image_slider)
+        self.style.element_create("dark_theme.Scale.slider", "image", self.image_slider)
+        self.style.configure("dark_theme.Scale.slider", image=self.image_slider)
 
         self.style.layout(
-            "custom.Horizontal.TScale",
+            "dark_theme.Horizontal.TScale",
             [
-                ("custom.Scale.trough", {"sticky": "ew"}),
+                ("dark_theme.Scale.trough", {"sticky": "ew"}),
                 (
-                    "custom.Scale.slider",
+                    "dark_theme.Scale.slider",
                     {
                         "side": "left",
                         "sticky": "",
-                        "children": [("custom.Horizontal.Scale.label", {"sticky": ""})],
+                        "children": [("dark_theme.Horizontal.Scale.label", {"sticky": ""})],
                     },
                 ),
             ],
@@ -209,16 +215,19 @@ class DarkThemeStyle:
 
 
 class Styles:
-    def __init__(self, root):
-        DarkThemeStyle(root)
-        LightThemeStyle(root)
-        self.style = Style()
+    def __init__(self, root):#
+        pass
+        # DarkThemeStyle(root)
+        # LightThemeStyle(root)
+        # self.style = Style()
 
     def use_dark_theme(self):
-        self.style.theme_use("dark_theme")
+        pass
+        # self.style.theme_use("dark_theme")
 
     def use_light_theme(self):
-        self.style.theme_use("light_theme")
+        pass
+        # self.style.theme_use("light_theme")
 
 
 ################
@@ -232,7 +241,7 @@ class CustomHorizontalScale(Scale):
         self.variable = kw.pop("variable")
         super().__init__(root, variable=self.variable, orient="horizontal", **kw)
         self.style = Style(root)
-        self._style_name = "{}.custom.Horizontal.TScale".format(self)
+        self._style_name = "{}.dark_theme.Horizontal.TScale".format(self)
         self["style"] = self._style_name
 
     def set(self, val):

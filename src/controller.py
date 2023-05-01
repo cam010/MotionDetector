@@ -124,7 +124,7 @@ class Controller:
 
         # x most recent motions detected
         self.RECENT_MOTIONS_COUNT = 20
-        self.motion = ["-" for _ in range(self.RECENT_MOTIONS_COUNT)]
+        self.motion = []
 
         # add functionality to cycle thru cameras
         self.max_camera_num = self.detect_cameras()

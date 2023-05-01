@@ -33,7 +33,10 @@ except ImportError:
         "Can't import cv2 module. Please install cv2 package. Program will exit",
     )
 
+from ttkthemes import ThemedTk
+
 import ttk_styles
+import colours
 
 
 class GUI:
@@ -44,8 +47,7 @@ class GUI:
         self.pause = False
 
         # init window
-        self.root = tk.Tk()
-        self.root.configure(background="")
+        self.root = ThemedTk(theme="equilux")
         self.root.geometry("929x484")
         self.root.title("Motion Detector")
         self.root.minsize(width=650, height=400)
@@ -240,8 +242,8 @@ class GUI:
         self.disable_source_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Disable Source",
-            command = lambda: self.change_frame_source(
-                change_to="blank",
+            command = lambda: self.change_disabled_source(
+                "disabled" if self.disable_source_button["text"] == "Disable Source" else "enabled"
             )
         )
         self.disable_source_button.grid(row=0, column=2)
@@ -276,6 +278,16 @@ class GUI:
             self.pause = False
         self.pause_button.config(state="normal")
 
+    def change_disabled_source(self, change_to):
+        if change_to == "disabled":
+            self.change_frame_source(
+                change_to="blank",
+            )
+            self.disable_source_button.config(text="Enable Source")
+        else:
+            self.disable_source_button.config(text="Disable Source")
+            self.change_frame_source(change_to="camera")
+    
     def load_video_file(self):
         filetypes = (
             ("video files", "*.mp4"),
@@ -294,7 +306,6 @@ class GUI:
             self.controller.source = "blank"
             self.controller.changed_source("blank")
             self.source_menu.entryconfig("Switch to Camera Mode", state="normal")
-            self.disable_source_button.config(state="disabled")
             self.switch_frame_source_button.config(state="normal")
 
         if change_to == "video":
@@ -303,7 +314,6 @@ class GUI:
                 self.controller.vid_source = source
                 self.controller.source = "video"
                 self.controller.changed_source("video")
-                self.disable_source_button.config(state="normal")
                 self.switch_frame_source_button.config(text="Switch to Camera Mode") 
                 self.source_menu.entryconfig("Switch to Camera Mode", state="normal")
                 
@@ -384,18 +394,16 @@ class GUI:
 
     def create_modifiers(self):
         # Whether or not to draw rects around moving objects
-        rect_draw_frame = tk.Frame(self.modifiers_frame)
         rect_draw_checkbox = ttk.Checkbutton(
-            rect_draw_frame,
+            self.modifiers_frame,
+            text="Enable Rect Drawing",
             command=lambda: self.rect_draw_changed(),
             variable=self.rect_draw_checkbox,
             onvalue=True,
             offvalue=False,
         )
         rect_draw_checkbox.state(["selected"])
-        rect_draw_checkbox.grid(row=0, column=0)
-        ttk.Label(rect_draw_frame, text="Enable Rect Drawing").grid(row=0, column=1)
-        rect_draw_frame.grid(row=2, column=0)
+        rect_draw_checkbox.grid(row=2, column=0)
 
         # How big the minimum area of a moving object rect has to be to be drawn
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
