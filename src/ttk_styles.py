@@ -5,9 +5,10 @@ from tkinter.ttk import Style, Scale
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from typing import Literal
+import colours
 
 
-class CustomStyle:
+class LightThemeStyle:
     def __init__(self, root):
         self.root = root
 
@@ -32,10 +33,7 @@ class CustomStyle:
         self.custom_horizontal_scale()
 
     def labelframe(self):
-        self.style.configure(
-            "TLabelframe",
-            background="white",
-        )
+        self.style.configure("TLabelframe", background="white", foreground="white")
         self.style.configure("TLabelframe.Label", background="white")
 
     def label(self):
@@ -100,6 +98,134 @@ class CustomStyle:
         )
 
 
+###########
+# DARK THEME
+############
+
+
+class DarkThemeStyle:
+    def __init__(self, root):
+        self.root = root
+
+        # init style
+        self.style = Style(master=self.root)
+        self.style.theme_create("dark_theme", parent="alt")
+        self.style.theme_use("dark_theme")
+
+        # Widget Images Directory
+        parent_dir = Path(__file__).resolve().parents[1]
+        self.widget_image_dir = os.path.join(
+            parent_dir, "Assets", "Images", "Widget Images"
+        )
+
+        # load widget styles
+        self.labelframe()
+        self.label()
+        self.checkbox()
+        self.combobox()
+        self.button()
+        self.separator()
+        self.custom_horizontal_scale()
+
+    def labelframe(self):
+        self.style.configure(
+            "TLabelframe",
+            background=colours.DARK_WIDGET_BACKGROUND,
+            foreground=colours.DARK_TEXT_COLOUR,
+        )
+        self.style.configure(
+            "TLabelframe.Label",
+            background=colours.DARK_WIDGET_BACKGROUND,
+            foreground=colours.DARK_TEXT_COLOUR,
+        )
+
+    def label(self):
+        self.style.configure(
+            "TLabel",
+            background=colours.DARK_WIDGET_BACKGROUND,
+            foreground=colours.DARK_TEXT_COLOUR,
+        )
+
+    def checkbox(self):
+        self.style.configure(
+            "TCheckbutton",
+            background=colours.DARK_WIDGET_BACKGROUND,
+            focuscolor=colours.DARK_WIDGET_BACKGROUND,
+            foreground=colours.DARK_WIDGET_ALT,
+            bd=None # error here no -bd
+        )
+        
+    def combobox(self):
+        self.style.configure(
+            "TCombobox",
+            selectbackground=colours.DARK_WIDGET_BACKGROUND,
+            selectforeground="black",
+            fieldbackground=colours.DARK_WIDGET_BACKGROUND,
+            background=colours.DARK_WIDGET_BACKGROUND,
+        )
+
+    def button(self):
+        self.style.configure("TButton", background=colours.DARK_WIDGET_BACKGROUND)
+
+    def separator(self):
+        self.style.configure(
+            "TSeparator",
+        )
+
+    def custom_horizontal_scale(self):
+        # https://stackoverflow.com/a/59680262 <-- See this answer regarding custom ttk sliders
+        self.image_trough = ImageTk.PhotoImage(
+            Image.open(os.path.join(self.widget_image_dir, "trough.png")).resize(
+                (25, 25)  # needs to be resized in future
+            )
+        )
+        self.image_slider = ImageTk.PhotoImage(
+            Image.open(os.path.join(self.widget_image_dir, "slider.png")).resize(
+                (30, 30)  # needs to be resized in future
+            )
+        )
+        self.style.element_create("custom.Scale.trough", "image", self.image_trough)
+        self.style.configure(
+            "custom.Scale.trough", image=self.image_trough
+        )  # This needs to be here, similar to camera frame label as img not stored within tkinter properly
+
+        self.style.element_create("custom.Scale.slider", "image", self.image_slider)
+        self.style.configure("custom.Scale.slider", image=self.image_slider)
+
+        self.style.layout(
+            "custom.Horizontal.TScale",
+            [
+                ("custom.Scale.trough", {"sticky": "ew"}),
+                (
+                    "custom.Scale.slider",
+                    {
+                        "side": "left",
+                        "sticky": "",
+                        "children": [("custom.Horizontal.Scale.label", {"sticky": ""})],
+                    },
+                ),
+            ],
+        )
+
+
+class Styles:
+    def __init__(self, root):
+        DarkThemeStyle(root)
+        LightThemeStyle(root)
+        self.style = Style()
+
+    def use_dark_theme(self):
+        self.style.theme_use("dark_theme")
+
+    def use_light_theme(self):
+        self.style.theme_use("light_theme")
+
+
+################
+# CUSTOM WIDGETS
+################
+
+
 class CustomHorizontalScale(Scale):
     # https://stackoverflow.com/a/59680262 <-- See this answer regarding custom ttk sliders
     def __init__(self, root, **kw):
@@ -133,7 +259,7 @@ class CustomInputWindow(tkinter.Toplevel):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        
+
         # Exception handler
         tkinter.Tk.report_callback_exception = self.report_callback_exception
 
@@ -204,7 +330,6 @@ class CustomInputWindow(tkinter.Toplevel):
                 return [False, "string too long"]
             else:
                 return [True]
-    
+
     def report_callback_exception(self, exc, val, tb):
         messagebox.showerror("Input Error", val)
-        

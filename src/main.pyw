@@ -45,6 +45,7 @@ class GUI:
 
         # init window
         self.root = tk.Tk()
+        self.root.configure(background="")
         self.root.geometry("929x484")
         self.root.title("Motion Detector")
         self.root.minsize(width=650, height=400)
@@ -55,8 +56,9 @@ class GUI:
         self.root.grid_rowconfigure(1, weight=1)
 
         # style
-        self.style = ttk_styles.CustomStyle(self.root)
-
+        self.style = ttk_styles.Styles(self.root)
+        self.style.use_dark_theme()
+        
         # create widgets
         self.create_menubar()
         self.create_image_label()
@@ -90,16 +92,16 @@ class GUI:
         quit()
 
     def create_menubar(self):
-        self.menubar = tk.Menu(self.root)
+        self.menubar = tk.Menu(self.root, background="blue", fg="white")
+        self.populate_menubar()
         self.root.config(menu=self.menubar)
 
-        self.populate_menubar()
 
     def populate_menubar(self):
         ###########
         # File menu
         ###########
-        file_menu = tk.Menu(self.menubar, tearoff=0)
+        file_menu = tk.Menu(self.menubar, tearoff=0, background="#434B4C", fg="white")
 
         file_menu.add_command(
             label="Exit", command=lambda: self.quit(), accelerator="Alt+F4"
@@ -108,7 +110,7 @@ class GUI:
         #################
         # Source Settings
         #################
-        self.source_menu = tk.Menu(self.menubar, tearoff=0)
+        self.source_menu = tk.Menu(self.menubar, tearoff=0, background="#434B4C", fg="white")
 
         self.source_menu.add_command(
             label="Open Video File",
@@ -126,8 +128,8 @@ class GUI:
         # Frame settings
         ###############
         # Rect settings
-        frame_settings_menu = tk.Menu(self.menubar, tearoff=0)
-        rect_size = tk.Menu(frame_settings_menu, tearoff=0)
+        frame_settings_menu = tk.Menu(self.menubar, tearoff=0, background="#434B4C", fg="white")
+        rect_size = tk.Menu(frame_settings_menu, tearoff=0, background="#434B4C", fg="white")
         for x in [100, 500, 1000, 2500, 5000, "custom"]:
             rect_size.add_command(
                 label=x,
@@ -187,7 +189,7 @@ class GUI:
         self.root.bind(
             "<Control-Shift-F>", lambda _: self.flip.set(not self.flip.get())
         )
-        self.root.bind("<KeyPress>", lambda e: print(e))
+        # self.root.bind("<KeyPress>", lambda e: print(e))
 
     def create_image_label(self):
         self.image_label = ttk.Label(self.root, image=None)
@@ -382,16 +384,18 @@ class GUI:
 
     def create_modifiers(self):
         # Whether or not to draw rects around moving objects
+        rect_draw_frame = tk.Frame(self.modifiers_frame)
         rect_draw_checkbox = ttk.Checkbutton(
-            self.modifiers_frame,
-            text="Enable Rect Drawing",
+            rect_draw_frame,
             command=lambda: self.rect_draw_changed(),
             variable=self.rect_draw_checkbox,
             onvalue=True,
             offvalue=False,
         )
         rect_draw_checkbox.state(["selected"])
-        rect_draw_checkbox.grid(row=2, column=0)
+        rect_draw_checkbox.grid(row=0, column=0)
+        ttk.Label(rect_draw_frame, text="Enable Rect Drawing").grid(row=0, column=1)
+        rect_draw_frame.grid(row=2, column=0)
 
         # How big the minimum area of a moving object rect has to be to be drawn
         ttk.Separator(self.modifiers_frame, orient="horizontal").grid(
