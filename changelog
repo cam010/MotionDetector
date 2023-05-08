@@ -1,7 +1,11 @@
 Changelog
 ---------
 
-- Version 1.2.0 The "piggyback" update
+- Version 1.2.1 08/05/23 
+    * Application now starts in zoomed mode
+    * Changed how motions are updated and shown on screen to make it smoother
+
+- Version 1.2.0 01/05/23 -> The "piggyback" update
     * Started developing "dark" and "light" themes for the app, got lazy and instead used the "Equilux" ttk theme
     * "disable source" button switches to "enable source" when clicked
 

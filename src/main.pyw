@@ -48,9 +48,11 @@ class GUI:
 
         # init window
         self.root = ThemedTk(theme="equilux")
-        self.root.geometry("929x484")
         self.root.title("Motion Detector")
         self.root.minsize(width=650, height=400)
+        self.root.geometry("800x500")
+        self.root.state("zoomed")
+        # self.root.attributes("-fullscreen", True)
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
         self.root.grid_columnconfigure(2, weight=1)
@@ -60,7 +62,7 @@ class GUI:
         # style
         self.style = ttk_styles.Styles(self.root)
         self.style.use_dark_theme()
-        
+
         # create widgets
         self.create_menubar()
         self.create_image_label()
@@ -73,10 +75,10 @@ class GUI:
         self.first_frame_loaded = False
         self.root.bind("<Configure>", self.resize)
 
-
         self.root.mainloop()
 
     def resize(self, event):
+        # return
         if event.widget == self.image_label and (
             event.height != self.height or event.width != self.width
         ):
@@ -98,7 +100,6 @@ class GUI:
         self.populate_menubar()
         self.root.config(menu=self.menubar)
 
-
     def populate_menubar(self):
         ###########
         # File menu
@@ -112,7 +113,9 @@ class GUI:
         #################
         # Source Settings
         #################
-        self.source_menu = tk.Menu(self.menubar, tearoff=0, background="#434B4C", fg="white")
+        self.source_menu = tk.Menu(
+            self.menubar, tearoff=0, background="#434B4C", fg="white"
+        )
 
         self.source_menu.add_command(
             label="Open Video File",
@@ -123,15 +126,19 @@ class GUI:
             label="Switch to Camera Mode",
             command=lambda: self.change_frame_source(change_to="camera"),
             accelerator="Ctrl+I",
-            state="disabled" # program will start in camera mode
+            state="disabled",  # program will start in camera mode
         )
 
         ###############
         # Frame settings
         ###############
         # Rect settings
-        frame_settings_menu = tk.Menu(self.menubar, tearoff=0, background="#434B4C", fg="white")
-        rect_size = tk.Menu(frame_settings_menu, tearoff=0, background="#434B4C", fg="white")
+        frame_settings_menu = tk.Menu(
+            self.menubar, tearoff=0, background="#434B4C", fg="white"
+        )
+        rect_size = tk.Menu(
+            frame_settings_menu, tearoff=0, background="#434B4C", fg="white"
+        )
         for x in [100, 500, 1000, 2500, 5000, "custom"]:
             rect_size.add_command(
                 label=x,
@@ -238,13 +245,15 @@ class GUI:
             ),
         )
         self.switch_frame_source_button.grid(row=0, column=1)
-        
+
         self.disable_source_button = ttk.Button(
             self.camera_modifiers_frame,
             text="Disable Source",
-            command = lambda: self.change_disabled_source(
-                "disabled" if self.disable_source_button["text"] == "Disable Source" else "enabled"
-            )
+            command=lambda: self.change_disabled_source(
+                "disabled"
+                if self.disable_source_button["text"] == "Disable Source"
+                else "enabled"
+            ),
         )
         self.disable_source_button.grid(row=0, column=2)
 
@@ -287,7 +296,7 @@ class GUI:
         else:
             self.disable_source_button.config(text="Disable Source")
             self.change_frame_source(change_to="camera")
-    
+
     def load_video_file(self):
         filetypes = (
             ("video files", "*.mp4"),
@@ -301,7 +310,7 @@ class GUI:
 
     def change_frame_source(self, change_to):
         self.switch_frame_source_button.config(state="disabled")
-        
+
         if change_to == "blank":
             self.controller.source = "blank"
             self.controller.changed_source("blank")
@@ -314,16 +323,21 @@ class GUI:
                 self.controller.vid_source = source
                 self.controller.source = "video"
                 self.controller.changed_source("video")
-                self.switch_frame_source_button.config(text="Switch to Camera Mode") 
+                self.switch_frame_source_button.config(text="Switch to Camera Mode")
                 self.source_menu.entryconfig("Switch to Camera Mode", state="normal")
-                
+
         elif change_to == "camera":
             # This if statement is to handle when user uses keyboard shortcut
             # to call "Switch to Camera Mode" when already in camera mode
-            if self.source_menu.entrycget(self.source_menu.index("Switch to Camera Mode"), "state") == "disabled":
+            if (
+                self.source_menu.entrycget(
+                    self.source_menu.index("Switch to Camera Mode"), "state"
+                )
+                == "disabled"
+            ):
                 self.switch_frame_source_button.config(state="normal")
                 return
-            
+
             self.controller.source = "camera"
             self.controller.changed_source("camera")
             self.disable_source_button.config(state="normal")
@@ -471,25 +485,33 @@ class GUI:
         )
         self.frame_type_combobox.grid(row=12, column=0)
 
+    def destroy_motion_labels(self):
+        for i, label in enumerate(self.motions_labels):
+            label.destroy()
+            self.motions_labels.pop(i)
+
+    def create_motion_labels(self):
+        # split into 2 for loops so that labels are put on screen at closer
+        # intervals for a smoother experience
+        for timestamp in self.recent_motions:
+            label = ttk.Label(self.motion_frame, text=timestamp)
+            self.motions_labels.append(label)
+        for label in self.motions_labels:
+            label.pack()
+
     def update_motions_display(self):
         while True:
             if self.stop_thread:
                 break
             if self.pause:
-                time.sleep(0.25) # if not here in every thread, causes app to grind to halt during pause
+                # if not here in every thread, causes app to grind to halt
+                # during pause
+                time.sleep(0.25)
                 continue
-            self.update_motions_internal()
-            for child in self.motion_frame.winfo_children():
-                if child["text"] == "Recent motion detections:":
-                    continue
-                elif child["text"] == "Open Output File":
-                    continue
-                child.destroy()
 
-            for x in self.recent_motions:
-                label = ttk.Label(self.motion_frame, text=x)
-                label.pack()
-                self.motions_labels.append(label)
+            self.set_recent_motions()
+            self.destroy_motion_labels()
+            self.create_motion_labels()
 
             # if grabbing motion from controller class is done every 0.25s,
             # then 12 will be grabbed in 3s so none are missed, but update speed
@@ -497,9 +519,8 @@ class GUI:
             # glitchy
             time.sleep(3)
 
-    def update_motions_internal(self):
-        motion = self.controller.get_motion()
-        self.recent_motions = motion
+    def set_recent_motions(self):
+        self.recent_motions = self.controller.get_motion()
 
     def open_output_file(self):
         startfile(self.controller.output_file_name)
@@ -521,10 +542,13 @@ class GUI:
 
     def update_frame_label_frame(self):
         while True:
+            # start_process_time = time.time()
             if self.stop_thread:
                 break
             if self.pause:
-                time.sleep(0.25) # if not here in every thread, causes app to grind to halt during pause
+                time.sleep(
+                    0.25
+                )  # if not here in every thread, causes app to grind to halt during pause
                 continue
             frame = self.controller.get_frame()
             if frame is None:
@@ -552,6 +576,13 @@ class GUI:
                 # So if there isn't a reference to the .image, then
                 # tkinter will discard it and a white image will be shown instead
                 self.image_label.image = frame
+                # end_process_time = time.time()
+                # difference = end_process_time - start_process_time
+                # # fps = 60
+                # if difference < 1 / 60:
+                #     # If the time spent processing the frame (difference) is less than the time that each frame should
+                #     # be displayed for (to fit with fps) then add a wait until the frame duration is finished
+                #     time.sleep(((1 / 60) - difference))
 
     def update_frame_label_frame_thread_controller(self):
         self.update_frame_label_frame_thread = threading.Thread(

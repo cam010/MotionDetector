@@ -83,7 +83,9 @@ class MotionDetector:
                 self.motion = []
                 continue
             else:
-                self.motion = datetime.datetime.now()
+                self.motion = str(
+                    datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S.%f")
+                )[:-4]  # makes microseconds only 2 decimals
             if show_rect:
                 # shows rect on camera
                 (x, y, w, h) = cv2.boundingRect(contour)
@@ -220,21 +222,19 @@ class Controller:
         # Widget Images Directory
         parent_dir = Path(__file__).resolve().parents[1]
         widget_image_dir = os.path.join(parent_dir, "Assets", "Images", "Widget Images")
-        self._init_frame = cv2.imread(
-            os.path.join(widget_image_dir, "no_camera.png")
-        )
+        self._init_frame = cv2.imread(os.path.join(widget_image_dir, "no_camera.png"))
 
     def start_video_processing(self):
         self.frame_num = 0
         self.total_frames = self.camera.get(cv2.CAP_PROP_FRAME_COUNT)
         self.fps = self.camera.get(cv2.CAP_PROP_FPS)
-        print(self.total_frames)
-        print(self.fps)
+        # print(self.total_frames)
+        # print(self.fps)
         self.start_vid = datetime.datetime.now()
 
     def process_frame(self):
         while True:
-            start_process_time = time.time()#datetime.datetime.now()
+            start_process_time = time.time()  # datetime.datetime.now()
             if self.stop_thread:
                 self.threads_alive.remove(self.process_frame_thread)
                 break
@@ -274,7 +274,7 @@ class Controller:
                     self.threads_alive.remove(self.process_frame_thread)
                     break
                 end_process_time = time.time()
-                difference = (end_process_time - start_process_time)
+                difference = end_process_time - start_process_time
                 if difference < 1 / self.fps:
                     # If the time spent processing the frame (difference) is less than the time that each frame should
                     # be displayed for (to fit with fps) then add a wait until the frame duration is finished
@@ -304,7 +304,7 @@ class Controller:
                 temp_motion.append(x)
 
             motion = self.detector.motion
-            if motion != []:
+            if motion != [] and motion not in temp_motion:
                 temp_motion.append(motion)
                 self.update_output_file(motion)
                 # playsound.playsound("beep.mp3")
@@ -340,6 +340,7 @@ class Controller:
         self.threads_alive.append(self.process_frame_thread)
 
 
+# I DONT THINK THIS IS ACTUALLY USED - NEEDS TO BE CHECKED
 class SettingChecks:
     def __init__(self) -> None:
         pass
