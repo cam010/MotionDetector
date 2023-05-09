@@ -58,6 +58,7 @@ class GUI:
         self.root.grid_columnconfigure(2, weight=1)
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
+        self.height, self.width = 0, 0
 
         # style
         self.style = ttk_styles.Styles(self.root)
@@ -542,7 +543,7 @@ class GUI:
 
     def update_frame_label_frame(self):
         while True:
-            # start_process_time = time.time()
+            start_process_time = time.time()
             if self.stop_thread:
                 break
             if self.pause:
@@ -576,13 +577,15 @@ class GUI:
                 # So if there isn't a reference to the .image, then
                 # tkinter will discard it and a white image will be shown instead
                 self.image_label.image = frame
-                # end_process_time = time.time()
-                # difference = end_process_time - start_process_time
-                # # fps = 60
-                # if difference < 1 / 60:
-                #     # If the time spent processing the frame (difference) is less than the time that each frame should
-                #     # be displayed for (to fit with fps) then add a wait until the frame duration is finished
-                #     time.sleep(((1 / 60) - difference))
+                
+                
+                end_process_time = time.time()
+                difference = end_process_time - start_process_time
+                # fps = 60
+                if difference < 1 / 60:
+                    # If the time spent processing the frame (difference) is less than the time that each frame should
+                    # be displayed for (to fit with fps) then add a wait until the frame duration is finished
+                    time.sleep(((1 / 60) - difference))
 
     def update_frame_label_frame_thread_controller(self):
         self.update_frame_label_frame_thread = threading.Thread(
